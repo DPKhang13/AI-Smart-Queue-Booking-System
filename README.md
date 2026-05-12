@@ -1,438 +1,507 @@
 # AI Smart Queue & Booking System
 
-## Overview
+<div align="center">
 
-**AI Smart Queue & Booking System** is a backend-focused personal project built with **Java Spring Boot**.  
-The system helps users book service appointments, receive queue numbers, track queue progress, and get smart recommendations for better booking times or less crowded branches.
+## Production-Style Backend Portfolio Project
 
-This project is designed to demonstrate backend engineering skills such as RESTful API design, authentication, role-based access control, queue management, database design, caching, and AI-based prediction logic.
+Backend-focused smart booking and queue management system built with Java Spring Boot, PostgreSQL, Redis, JWT, and Docker.
 
----
+![Java](https://img.shields.io/badge/Java-21-red)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-green)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
+![Redis](https://img.shields.io/badge/Redis-7-red)
+![Docker](https://img.shields.io/badge/Docker-Enabled-blue)
+![JWT](https://img.shields.io/badge/Auth-JWT-orange)
 
-## Project Purpose
-
-Many service businesses such as cafés, clinics, salons, vehicle service centers, and customer support offices face the same problem: customers often wait too long because booking and queue systems are not optimized.
-
-This project solves that problem by providing:
-
-- Online booking management
-- Queue ticket generation
-- Real-time queue status tracking
-- Branch capacity management
-- Admin analytics dashboard
-- AI-based wait-time and peak-hour prediction
+</div>
 
 ---
 
-## Main Features
+# Project Overview
 
-### Authentication & Authorization
+AI Smart Queue & Booking System is a backend-focused portfolio project designed to simulate a production-style booking and queue management platform for service-based businesses such as:
+
+- Cafés
+- Clinics
+- Salons
+- EV service centers
+- Customer support offices
+
+The system allows users to:
+
+- Create bookings
+- Receive queue numbers
+- Track queue progress
+- View estimated waiting time
+- Get AI-based booking recommendations
+
+This project was intentionally designed to demonstrate real-world backend engineering concepts instead of a traditional university CRUD assignment.
+
+---
+
+# Why This Project Matters
+
+Many businesses struggle with:
+
+- Long customer waiting times
+- Manual queue handling
+- Poor booking optimization
+- No analytics visibility
+- Inefficient customer flow
+
+This project solves those problems by combining:
+
+- Booking management
+- Queue tracking
+- Branch capacity control
+- Analytics dashboards
+- AI-based prediction features
+
+The system architecture was designed to simulate modern backend systems commonly used in startups, SaaS platforms, and fintech-style services.
+
+---
+
+# Main Features
+
+## Authentication & Authorization
 
 - User registration
 - User login
 - JWT authentication
-- Role-based access control
+- Password encryption
+- Role-based authorization
 
 Roles:
 
-- `USER`
-- `STAFF`
-- `ADMIN`
+- USER
+- STAFF
+- ADMIN
 
 ---
 
-### Branch Management
-
-Admin can manage service branches, including:
-
-- Branch name
-- Branch location
-- Opening time
-- Closing time
-- Booking capacity
-- Active/inactive status
-
----
-
-### Booking Management
+## Booking Management
 
 Users can:
 
-- Create a booking
-- Cancel a booking
+- Create bookings
+- Cancel bookings
 - View booking history
 - Check booking status
 
-Booking validation includes:
+Validation logic includes:
 
-- Preventing duplicate bookings
-- Checking branch availability
-- Checking operating hours
-- Checking queue capacity
+- Duplicate booking prevention
+- Capacity validation
+- Operating-hours validation
+- Queue overflow prevention
 
 ---
 
-### Queue Management
+## Queue Management
 
 The system supports:
 
 - Queue ticket generation
 - Queue number assignment
-- Queue status tracking
+- Queue position tracking
+- Estimated wait time calculation
 - Staff queue processing
-- Estimated waiting time calculation
+- Queue completion tracking
 
-Queue status examples:
+Queue statuses:
 
-- `WAITING`
-- `IN_PROGRESS`
-- `COMPLETED`
-- `CANCELLED`
+- WAITING
+- IN_PROGRESS
+- COMPLETED
+- CANCELLED
 
 ---
 
-### Admin Dashboard & Analytics
+## Branch Management
 
-Admin can view:
+Admin can manage:
+
+- Branch operating hours
+- Booking capacity
+- Active/inactive branches
+- Branch performance
+
+---
+
+## Analytics Dashboard
+
+Admin analytics include:
 
 - Total bookings
-- Total cancelled bookings
-- Average waiting time
+- Cancellation rate
 - Peak booking hours
-- Branch performance
+- Average waiting time
 - Queue completion rate
+- Branch performance
 
 ---
 
-### AI Prediction Module
+## AI Prediction Module
 
-The AI module can provide:
+AI features include:
 
-- Estimated waiting time prediction
+- Estimated wait-time prediction
 - Peak-hour prediction
-- Less crowded branch recommendation
-- Suggested booking time
+- Smart booking recommendations
+- Less crowded branch suggestions
 
-The first version can use rule-based prediction or simple historical data analysis.  
-Later versions can be upgraded with a Python AI microservice.
+Initial implementation:
+
+- Rule-based prediction
+- Historical data analysis
+
+Future implementation:
+
+- Python AI microservice
+- ML prediction models
 
 ---
 
-## Tech Stack
+# Tech Stack
 
-### Backend
+## Backend
 
 - Java 21
 - Spring Boot
 - Spring Security
 - Spring Data JPA
 - JWT
-- RESTful API
+- RESTful APIs
 
-### Database
+## Database
 
 - PostgreSQL
 
-### Cache
+## Cache
 
 - Redis
 
-### Tools
+## DevOps & Tools
 
 - Docker
 - Docker Compose
-- Swagger / OpenAPI
+- Swagger/OpenAPI
 - Postman
 - GitHub
 
-### Optional Advanced Tools
+## Optional Advanced Features
 
-- RabbitMQ or Kafka
-- GitHub Actions
-- JUnit
-- Mockito
-- Testcontainers
+- Kafka / RabbitMQ
+- GitHub Actions CI/CD
+- WebSocket / SSE
 - Flyway
+- JUnit & Mockito
+- Testcontainers
 
 ---
 
-## Source Code Structure
+# System Architecture
 
-This project follows a layered Spring Boot structure similar to common enterprise backend projects.
+## High-Level Architecture
+
+```text
+Client Applications
+        ↓
+Spring Boot REST API
+        ↓
+-------------------------------------------------
+| Auth Module                                   |
+| Booking Module                                |
+| Queue Module                                  |
+| Analytics Module                              |
+| Prediction Module                             |
+| Notification Module                           |
+-------------------------------------------------
+        ↓
+PostgreSQL + Redis
+```
+
+---
+
+# Engineering Decisions
+
+## Why JWT Authentication?
+
+JWT provides stateless authentication, making the system scalable and suitable for distributed backend architectures.
+
+---
+
+## Why Redis?
+
+Redis is used for:
+
+- Queue caching
+- Fast queue lookup
+- Realtime queue tracking
+- Reducing database load
+
+---
+
+## Why Layered Architecture?
+
+The project uses a layered Spring Boot architecture to improve:
+
+- Maintainability
+- Scalability
+- Code separation
+- Team collaboration
+- Testing capability
+
+---
+
+## Why DTO Pattern?
+
+DTOs separate API responses from database entities and improve:
+
+- Security
+- API consistency
+- Maintainability
+
+---
+
+# Source Code Structure
 
 ```text
 src/main/java/com/khang/smartqueue/
 │
 ├── base
-│   ├── BaseEntity.java
-│   ├── BaseResponse.java
-│   └── BaseController.java
-│
 ├── config
-│   ├── SecurityConfig.java
-│   ├── JwtAuthenticationFilter.java
-│   ├── RedisConfig.java
-│   ├── SwaggerConfig.java
-│   └── WebConfig.java
-│
 ├── constants
-│   ├── RoleConstants.java
-│   ├── BookingStatus.java
-│   ├── QueueStatus.java
-│   └── MessageConstants.java
-│
 ├── controller
-│   ├── AuthController.java
-│   ├── UserController.java
-│   ├── BranchController.java
-│   ├── BookingController.java
-│   ├── QueueController.java
-│   ├── NotificationController.java
-│   ├── AnalyticsController.java
-│   └── PredictionController.java
-│
 ├── dto
-│   ├── request
-│   │   ├── LoginRequest.java
-│   │   ├── RegisterRequest.java
-│   │   ├── CreateBookingRequest.java
-│   │   ├── CancelBookingRequest.java
-│   │   ├── CreateBranchRequest.java
-│   │   └── UpdateBranchRequest.java
-│   │
-│   └── response
-│       ├── AuthResponse.java
-│       ├── UserResponse.java
-│       ├── BranchResponse.java
-│       ├── BookingResponse.java
-│       ├── QueueTicketResponse.java
-│       ├── AnalyticsResponse.java
-│       └── PredictionResponse.java
-│
 ├── entity
-│   ├── User.java
-│   ├── Branch.java
-│   ├── Booking.java
-│   ├── QueueTicket.java
-│   ├── Notification.java
-│   └── QueuePrediction.java
-│
 ├── exception
-│   ├── GlobalExceptionHandler.java
-│   ├── AppException.java
-│   ├── ErrorCode.java
-│   └── ErrorResponse.java
-│
 ├── initializer
-│   ├── DataInitializer.java
-│   └── RoleInitializer.java
-│
 ├── mapper
-│   ├── UserMapper.java
-│   ├── BranchMapper.java
-│   ├── BookingMapper.java
-│   ├── QueueMapper.java
-│   └── NotificationMapper.java
-│
 ├── repository
-│   ├── UserRepository.java
-│   ├── BranchRepository.java
-│   ├── BookingRepository.java
-│   ├── QueueTicketRepository.java
-│   ├── NotificationRepository.java
-│   └── QueuePredictionRepository.java
-│
 ├── service
-│   ├── AuthService.java
-│   ├── UserService.java
-│   ├── BranchService.java
-│   ├── BookingService.java
-│   ├── QueueService.java
-│   ├── NotificationService.java
-│   ├── AnalyticsService.java
-│   └── PredictionService.java
-│
 ├── serviceImpl
-│   ├── AuthServiceImpl.java
-│   ├── UserServiceImpl.java
-│   ├── BranchServiceImpl.java
-│   ├── BookingServiceImpl.java
-│   ├── QueueServiceImpl.java
-│   ├── NotificationServiceImpl.java
-│   ├── AnalyticsServiceImpl.java
-│   └── PredictionServiceImpl.java
-│
 ├── specification
-│   ├── BookingSpecification.java
-│   ├── BranchSpecification.java
-│   └── UserSpecification.java
 │
 └── SmartQueueApplication.java
 ```
 
 ---
 
-## Folder Explanation
+# Main Database Tables
 
-### `base`
-
-Contains reusable base classes such as base entity, base response, and shared controller logic.
-
-### `config`
-
-Contains project configuration such as security, JWT filter, Redis, Swagger, and CORS settings.
-
-### `constants`
-
-Contains enums and constant values used across the system.
-
-### `controller`
-
-Handles incoming API requests and returns responses to the client.
-
-### `dto`
-
-Contains request and response objects.  
-DTOs help separate API data from database entities.
-
-### `entity`
-
-Contains JPA entity classes mapped to database tables.
-
-### `exception`
-
-Handles application errors and global exception responses.
-
-### `initializer`
-
-Contains default data setup such as default admin account, sample branches, and roles.
-
-### `mapper`
-
-Converts entities to DTOs and DTOs to entities.
-
-### `repository`
-
-Handles database access using Spring Data JPA.
-
-### `service`
-
-Contains service interfaces that define business logic contracts.
-
-### `serviceImpl`
-
-Contains service implementation classes where the main business logic is written.
-
-### `specification`
-
-Contains dynamic query filters for searching, filtering, and sorting data.
+| Table             | Purpose                 |
+| ----------------- | ----------------------- |
+| users             | User accounts and roles |
+| branches          | Branch information      |
+| bookings          | Booking records         |
+| queue_tickets     | Queue management        |
+| notifications     | Notification storage    |
+| queue_predictions | AI prediction data      |
 
 ---
 
-## Example API Endpoints
+# Example API Endpoints
 
-### Authentication
+## Authentication
 
 ```http
 POST /api/auth/register
 POST /api/auth/login
 ```
 
-### User
+---
 
-```http
-GET /api/users/profile
-PUT /api/users/profile
-```
-
-### Branch
-
-```http
-POST /api/branches
-GET /api/branches
-GET /api/branches/{id}
-PUT /api/branches/{id}
-DELETE /api/branches/{id}
-```
-
-### Booking
+## Booking APIs
 
 ```http
 POST /api/bookings
 GET /api/bookings/my-bookings
-GET /api/bookings/{id}
 PUT /api/bookings/{id}/cancel
 ```
 
-### Queue
+---
+
+## Queue APIs
 
 ```http
-GET /api/queues/branch/{branchId}
+GET /api/queues/{ticketId}/position
 PUT /api/queues/{ticketId}/start
 PUT /api/queues/{ticketId}/complete
-GET /api/queues/{ticketId}/position
-```
-
-### Analytics
-
-```http
-GET /api/admin/analytics/overview
-GET /api/admin/analytics/peak-hours
-GET /api/admin/analytics/branch-performance
-```
-
-### AI Prediction
-
-```http
-GET /api/predictions/wait-time?branchId=1
-GET /api/predictions/recommend-branch
-GET /api/predictions/recommend-time
 ```
 
 ---
 
-## Database Tables
+# Example API Response
 
-Main tables:
-
-- `users`
-- `branches`
-- `bookings`
-- `queue_tickets`
-- `notifications`
-- `queue_predictions`
+```json
+{
+  "bookingId": 15,
+  "queueNumber": "A-102",
+  "estimatedWaitTime": 18,
+  "status": "WAITING"
+}
+```
 
 ---
 
-## System Workflow
+# System Workflow
 
 ```text
 1. User registers or logs in
 2. User selects a branch
 3. User creates a booking
 4. System validates booking rules
-5. System generates a queue ticket
+5. System generates queue ticket
 6. User tracks queue position
 7. Staff processes queue tickets
-8. Admin views analytics dashboard
-9. AI module recommends better booking times or branches
+8. Admin monitors analytics dashboard
+9. AI module recommends better booking times
 ```
 
 ---
 
-## Future Improvements
+# Scalability Considerations
 
-- WebSocket real-time queue updates
-- Kafka or RabbitMQ event-driven notification
-- Email and SMS notification
-- AI microservice using Python
+The project was designed with scalability in mind:
+
+- Modular backend structure
+- Stateless JWT authentication
+- Redis caching for queue optimization
+- Separated business domains
+- Async-ready architecture
+- Future microservice compatibility
+
+Planned scalability improvements:
+
+- Kafka/RabbitMQ event-driven workflows
+- WebSocket realtime updates
+- AI microservices
+- CI/CD automation
+- Cloud deployment
+
+---
+
+# Current Project Status
+
+| Feature                | Status         |
+| ---------------------- | -------------- |
+| Authentication System  | ✅ Completed   |
+| Booking APIs           | ✅ Completed   |
+| Queue Management       | ✅ Completed   |
+| PostgreSQL Integration | ✅ Completed   |
+| Redis Integration      | 🚧 In Progress |
+| Analytics APIs         | 🚧 In Progress |
+| AI Prediction Module   | 🚧 In Progress |
+| Notification System    | 📌 Planned     |
+| Kafka Integration      | 📌 Planned     |
+| Deployment             | 📌 Planned     |
+
+---
+
+# Future Improvements
+
+Planned improvements include:
+
+- WebSocket realtime queue updates
+- Kafka or RabbitMQ event processing
+- Email/SMS notifications
+- AI microservice integration
 - Admin frontend dashboard
-- CI/CD using GitHub Actions
-- Unit and integration testing
-- Deployment to Render, Railway, AWS, or VPS
+- CI/CD with GitHub Actions
+- Unit & integration testing
+- Cloud deployment
 
-## Author
+---
 
-**Dang Phuc Khang**  
+# How To Run The Project
+
+## Clone Repository
+
+```bash
+git clone https://github.com/your-username/ai-smart-queue-system.git
+cd ai-smart-queue-system
+```
+
+---
+
+## Start PostgreSQL & Redis
+
+```bash
+docker-compose up -d
+```
+
+---
+
+## Run Spring Boot Application
+
+```bash
+./mvnw spring-boot:run
+```
+
+For Windows:
+
+```bash
+mvnw.cmd spring-boot:run
+```
+
+---
+
+# Planned Repository Structure
+
+```text
+smart-queue-system/
+│
+├── docs/
+│   ├── architecture/
+│   ├── erd/
+│   ├── api-flow/
+│   └── planning/
+│
+├── postman/
+├── src/
+├── docker-compose.yml
+├── README.md
+└── pom.xml
+```
+
+---
+
+# Documentation Included
+
+The repository will include:
+
+- Architecture diagrams
+- ERD diagrams
+- API flow diagrams
+- Postman collection
+- Swagger documentation
+- Docker configuration
+- System planning files
+
+---
+
+# Recruiter-Focused Goals
+
+This project was designed to demonstrate:
+
+- Production-style backend architecture
+- Real-world business logic implementation
+- RESTful API design
+- Scalable backend structure
+- Database design knowledge
+- Redis caching concepts
+- AI integration concepts
+- Docker deployment workflow
+- Professional documentation quality
+
+The goal is for this project to resemble a junior backend engineer portfolio project rather than a university assignment.
+
+---
+
+# Author
+
+## Dang Phuc Khang
+
 Software Engineering Student  
 Backend Developer Intern Candidate
