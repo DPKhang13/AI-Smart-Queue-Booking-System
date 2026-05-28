@@ -1,29 +1,34 @@
 package com.personal.ai_sqbs.entity;
 
+
+import com.personal.ai_sqbs.constant.QueueStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "queue_tickets")
 public class QueueTicket {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ticket_id", nullable = false)
-    private Long id;
+    @Column(name = "ticket_id")
+    private Long ticketId;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "booking_id")
+    @JoinColumn(name = "booking_id", unique = true)
     private Booking booking;
 
     @NotNull
@@ -51,8 +56,8 @@ public class QueueTicket {
     @Column(name = "counter_name", length = 50)
     private String counterName;
 
-    @Size(max = 30)
     @NotNull
+    @Size(max = 30)
     @Column(name = "ticket_number", nullable = false, length = 30)
     private String ticketNumber;
 
@@ -60,10 +65,10 @@ public class QueueTicket {
     @Column(name = "queue_date", nullable = false)
     private LocalDate queueDate;
 
-    @Size(max = 30)
     @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
-    private String status;
+    private QueueStatus status;
 
     @Column(name = "check_in_time")
     private OffsetDateTime checkInTime;
@@ -74,24 +79,46 @@ public class QueueTicket {
     @Column(name = "completed_time")
     private OffsetDateTime completedTime;
 
+    @PositiveOrZero
     @Column(name = "estimated_wait_minutes")
     private Integer estimatedWaitMinutes;
 
+    @PositiveOrZero
     @Column(name = "actual_wait_minutes")
     private Integer actualWaitMinutes;
 
-    @NotNull
-    @ColumnDefault("1")
+    @Version
     @Column(name = "version", nullable = false)
     private Integer version;
 
     @NotNull
-    @ColumnDefault("now()")
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
+    @OneToMany(mappedBy = "queueTicket", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<QueueEvent> queueEvents = new ArrayList<>();
 
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = OffsetDateTime.now();
+        }
+
+        if (status == null) {
+            status = QueueStatus.WAITING;
+        }
+
+        if (version == null) {
+            version = 1;
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = OffsetDateTime.now();
+    }
 }

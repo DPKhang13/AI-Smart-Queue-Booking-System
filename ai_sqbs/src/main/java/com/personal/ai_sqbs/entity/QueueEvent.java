@@ -1,25 +1,26 @@
 package com.personal.ai_sqbs.entity;
 
+import com.personal.ai_sqbs.constant.QueueEventType;
+import com.personal.ai_sqbs.constant.QueueStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.time.OffsetDateTime;
 
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "queue_events")
 public class QueueEvent {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "event_id", nullable = false)
-    private Long id;
+    @Column(name = "event_id")
+    private Long eventId;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -30,27 +31,31 @@ public class QueueEvent {
     @JoinColumn(name = "performed_by_id")
     private User performedBy;
 
-    @Size(max = 30)
+    @Enumerated(EnumType.STRING)
     @Column(name = "old_status", length = 30)
-    private String oldStatus;
+    private QueueStatus oldStatus;
 
-    @Size(max = 30)
     @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "new_status", nullable = false, length = 30)
-    private String newStatus;
+    private QueueStatus newStatus;
 
-    @Size(max = 50)
     @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "event_type", nullable = false, length = 50)
-    private String eventType;
+    private QueueEventType eventType;
 
-    @Column(name = "note", length = Integer.MAX_VALUE)
+    @Column(name = "note", columnDefinition = "TEXT")
     private String note;
 
     @NotNull
-    @ColumnDefault("now()")
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
-
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = OffsetDateTime.now();
+        }
+    }
 }

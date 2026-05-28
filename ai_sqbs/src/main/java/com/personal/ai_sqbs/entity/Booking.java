@@ -1,27 +1,30 @@
 package com.personal.ai_sqbs.entity;
 
+import com.personal.ai_sqbs.constant.BookingStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "bookings")
 public class Booking {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "booking_id", nullable = false)
-    private Long id;
+    @Column(name = "booking_id")
+    private Long bookingId;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -38,9 +41,9 @@ public class Booking {
     @JoinColumn(name = "service_type_id", nullable = false)
     private ServiceType serviceType;
 
-    @Size(max = 50)
     @NotNull
-    @Column(name = "booking_code", nullable = false, length = 50)
+    @Size(max = 50)
+    @Column(name = "booking_code", nullable = false, unique = true, length = 50)
     private String bookingCode;
 
     @NotNull
@@ -51,35 +54,57 @@ public class Booking {
     @Column(name = "booking_time", nullable = false)
     private LocalTime bookingTime;
 
-    @Size(max = 30)
     @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
-    private String status;
+    private BookingStatus status;
 
-    @Column(name = "note", length = Integer.MAX_VALUE)
+    @Column(name = "note", columnDefinition = "TEXT")
     private String note;
 
     @Column(name = "cancelled_at")
     private OffsetDateTime cancelledAt;
 
-    @Column(name = "cancellation_reason", length = Integer.MAX_VALUE)
+    @Column(name = "cancellation_reason", columnDefinition = "TEXT")
     private String cancellationReason;
 
     @Column(name = "archived_at")
     private OffsetDateTime archivedAt;
 
-    @NotNull
-    @ColumnDefault("1")
+    @Version
     @Column(name = "version", nullable = false)
     private Integer version;
 
-    @NotNull
-    @ColumnDefault("now()")
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
+    @OneToOne(mappedBy = "booking", fetch = FetchType.LAZY)
+    private QueueTicket queueTicket;
 
+    @OneToMany(mappedBy = "booking", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Notification> notifications = new ArrayList<>();
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = OffsetDateTime.now();
+        }
+
+        if (status == null) {
+            status = BookingStatus.PENDING;
+        }
+
+        if (version == null) {
+            version = 1;
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = OffsetDateTime.now();
+    }
 }

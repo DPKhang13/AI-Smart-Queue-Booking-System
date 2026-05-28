@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -12,18 +11,19 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Map;
 
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "prediction_logs")
 public class PredictionLog {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "prediction_log_id", nullable = false)
-    private Long id;
+    @Column(name = "prediction_log_id")
+    private Long predictionLogId;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -37,12 +37,12 @@ public class PredictionLog {
 
     @NotNull
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "input_data", nullable = false)
+    @Column(name = "input_data", nullable = false, columnDefinition = "jsonb")
     private Map<String, Object> inputData;
 
     @NotNull
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "output_data", nullable = false)
+    @Column(name = "output_data", nullable = false, columnDefinition = "jsonb")
     private Map<String, Object> outputData;
 
     @Column(name = "confidence_score", precision = 5, scale = 2)
@@ -53,9 +53,13 @@ public class PredictionLog {
     private String modelVersion;
 
     @NotNull
-    @ColumnDefault("now()")
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
-
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = OffsetDateTime.now();
+        }
+    }
 }

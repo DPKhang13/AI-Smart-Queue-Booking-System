@@ -1,28 +1,31 @@
 package com.personal.ai_sqbs.entity;
 
+
+import com.personal.ai_sqbs.constant.PredictionMethod;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "queue_predictions")
 public class QueuePrediction {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "prediction_id", nullable = false)
-    private Long id;
+    @Column(name = "prediction_id")
+    private Long predictionId;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -43,24 +46,30 @@ public class QueuePrediction {
     private LocalTime predictionTime;
 
     @NotNull
+    @PositiveOrZero
     @Column(name = "predicted_wait_minutes", nullable = false)
     private Integer predictedWaitMinutes;
 
+    @PositiveOrZero
     @Column(name = "predicted_queue_length")
     private Integer predictedQueueLength;
 
     @Column(name = "confidence_score", precision = 5, scale = 2)
     private BigDecimal confidenceScore;
 
-    @Size(max = 50)
     @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "method", nullable = false, length = 50)
-    private String method;
+    private PredictionMethod method;
 
     @NotNull
-    @ColumnDefault("now()")
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
-
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = OffsetDateTime.now();
+        }
+    }
 }
