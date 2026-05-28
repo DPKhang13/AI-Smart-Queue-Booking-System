@@ -6,9 +6,9 @@
 
 Backend-focused smart booking and queue management system built with Java Spring Boot, PostgreSQL, Redis, JWT, and Docker.
 
-![Java](https://img.shields.io/badge/Java-21-red)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-green)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
+![Java](https://img.shields.io/badge/Java-25-red)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.6-green)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-9.4-blue)
 ![Redis](https://img.shields.io/badge/Redis-7-red)
 ![Docker](https://img.shields.io/badge/Docker-Enabled-blue)
 ![JWT](https://img.shields.io/badge/Auth-JWT-orange)
