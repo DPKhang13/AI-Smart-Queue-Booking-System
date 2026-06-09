@@ -1,5 +1,6 @@
 package com.personal.ai_sqbs.entity;
 
+import com.personal.ai_sqbs.base.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -14,7 +15,7 @@ import java.time.OffsetDateTime;
 @Builder
 @Entity
 @Table(name = "branch_schedules")
-public class BranchSchedule {
+public class BranchSchedule extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,21 +42,9 @@ public class BranchSchedule {
     @Column(name = "is_closed", nullable = false)
     private Boolean isClosed = false;
 
-    @NotNull
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) createdAt = OffsetDateTime.now();
+    @Override
+    protected void beforeCreate() {
         if (isClosed == null) isClosed = false;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
-    }
 }

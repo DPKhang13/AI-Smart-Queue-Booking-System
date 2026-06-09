@@ -1,11 +1,11 @@
 package com.personal.ai_sqbs.entity;
 
+import com.personal.ai_sqbs.base.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +16,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "counters")
-public class Counter {
+public class Counter extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,13 +41,6 @@ public class Counter {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
-    @NotNull
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
-
     @OneToMany(mappedBy = "counter", fetch = FetchType.LAZY)
     @Builder.Default
     private List<CounterAssignment> counterAssignments = new ArrayList<>();
@@ -56,14 +49,8 @@ public class Counter {
     @Builder.Default
     private List<QueueTicket> queueTickets = new ArrayList<>();
 
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) createdAt = OffsetDateTime.now();
+    @Override
+    protected void beforeCreate() {
         if (isActive == null) isActive = true;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
     }
 }

@@ -1,5 +1,6 @@
 package com.personal.ai_sqbs.entity;
 
+import com.personal.ai_sqbs.base.BaseEntity;
 import com.personal.ai_sqbs.constant.BookingStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -19,7 +20,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "bookings")
-public class Booking {
+public class Booking extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -75,12 +76,6 @@ public class Booking {
     @Column(name = "version", nullable = false)
     private Integer version;
 
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
-
     @OneToOne(mappedBy = "booking", fetch = FetchType.LAZY)
     private QueueTicket queueTicket;
 
@@ -95,11 +90,8 @@ public class Booking {
     @Builder.Default
     private List<CustomerFeedback> customerFeedbacks = new ArrayList<>();
 
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = OffsetDateTime.now();
-        }
+    @Override
+    protected void beforeCreate() {
 
         if (status == null) {
             status = BookingStatus.PENDING;
@@ -110,8 +102,4 @@ public class Booking {
         }
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
-    }
 }

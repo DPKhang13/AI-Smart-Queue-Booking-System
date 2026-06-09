@@ -1,5 +1,6 @@
 package com.personal.ai_sqbs.entity;
 
+import com.personal.ai_sqbs.base.BaseEntity;
 import com.personal.ai_sqbs.constant.StaffShiftStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -7,7 +8,6 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +18,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "staff_shifts")
-public class StaffShift {
+public class StaffShift extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,25 +52,12 @@ public class StaffShift {
     @Column(name = "status", nullable = false, length = 30)
     private StaffShiftStatus status;
 
-    @NotNull
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
-
     @OneToMany(mappedBy = "shift", fetch = FetchType.LAZY)
     @Builder.Default
     private List<CounterAssignment> counterAssignments = new ArrayList<>();
 
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) createdAt = OffsetDateTime.now();
+    @Override
+    protected void beforeCreate() {
         if (status == null) status = StaffShiftStatus.SCHEDULED;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
     }
 }

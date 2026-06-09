@@ -1,5 +1,6 @@
 package com.personal.ai_sqbs.entity;
 
+import com.personal.ai_sqbs.base.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -17,7 +18,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "service_types")
-public class ServiceType {
+public class ServiceType extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,14 +55,7 @@ public class ServiceType {
 
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
-
-    @NotNull
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
-
+    
     @OneToMany(mappedBy = "serviceType", fetch = FetchType.LAZY)
     @Builder.Default
     private List<ServiceCapacitySlot> capacitySlots = new ArrayList<>();
@@ -86,15 +80,10 @@ public class ServiceType {
     @Builder.Default
     private List<CustomerFeedback> customerFeedbacks = new ArrayList<>();
 
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) createdAt = OffsetDateTime.now();
+    @Override
+    protected void beforeCreate() {
         if (isActive == null) isActive = true;
         if (isDeleted == null) isDeleted = false;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
-    }
 }
