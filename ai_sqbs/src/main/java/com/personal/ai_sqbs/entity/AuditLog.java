@@ -56,8 +56,6 @@ public class AuditLog {
 
     @PrePersist
     protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = OffsetDateTime.now();
-        }
+        if (createdAt == null) createdAt = OffsetDateTime.now();
     }
 }

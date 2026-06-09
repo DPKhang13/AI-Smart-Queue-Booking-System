@@ -1,4 +1,6 @@
 package com.personal.ai_sqbs.entity;
+
+import com.personal.ai_sqbs.base.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -15,7 +17,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "users")
-public class User {
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,13 +61,6 @@ public class User {
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
 
-    @NotNull
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
-
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @Builder.Default
     private List<Booking> bookings = new ArrayList<>();
@@ -78,9 +73,21 @@ public class User {
     @Builder.Default
     private List<QueueTicket> assignedQueueTickets = new ArrayList<>();
 
+    @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<StaffShift> staffShifts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<CounterAssignment> counterAssignments = new ArrayList<>();
+
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @Builder.Default
     private List<Notification> notifications = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<CustomerFeedback> customerFeedbacks = new ArrayList<>();
 
     @OneToMany(mappedBy = "performedBy", fetch = FetchType.LAZY)
     @Builder.Default
@@ -90,12 +97,8 @@ public class User {
     @Builder.Default
     private List<QueueEvent> queueEvents = new ArrayList<>();
 
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = OffsetDateTime.now();
-        }
-
+    @Override
+    protected void beforeCreate() {
         if (isActive == null) {
             isActive = true;
         }
@@ -103,10 +106,5 @@ public class User {
         if (isDeleted == null) {
             isDeleted = false;
         }
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
     }
 }

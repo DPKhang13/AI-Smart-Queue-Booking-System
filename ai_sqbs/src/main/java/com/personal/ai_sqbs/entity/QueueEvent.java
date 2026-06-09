@@ -54,8 +54,6 @@ public class QueueEvent {
 
     @PrePersist
     protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = OffsetDateTime.now();
-        }
+        if (createdAt == null) createdAt = OffsetDateTime.now();
     }
 }

@@ -1,5 +1,6 @@
 package com.personal.ai_sqbs.entity;
 
+import com.personal.ai_sqbs.base.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -18,7 +19,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "branches")
-public class Branch {
+public class Branch extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,12 +40,12 @@ public class Branch {
     private String phone;
 
     @NotNull
-    @Column(name = "opening_time", nullable = false)
-    private LocalTime openingTime;
+    @Column(name = "default_opening_time", nullable = false)
+    private LocalTime defaultOpeningTime;
 
     @NotNull
-    @Column(name = "closing_time", nullable = false)
-    private LocalTime closingTime;
+    @Column(name = "default_closing_time", nullable = false)
+    private LocalTime defaultClosingTime;
 
     @NotNull
     @Positive
@@ -69,12 +70,14 @@ public class Branch {
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
 
-    @NotNull
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
+    @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<BranchSchedule> schedules = new ArrayList<>();
+
+    @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<BranchHoliday> holidays = new ArrayList<>();
 
     @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY)
     @Builder.Default
@@ -82,18 +85,38 @@ public class Branch {
 
     @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY)
     @Builder.Default
+    private List<ServiceCapacitySlot> serviceCapacitySlots = new ArrayList<>();
+
+    @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY)
+    @Builder.Default
     private List<Booking> bookings = new ArrayList<>();
+
+    @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Counter> counters = new ArrayList<>();
+
+    @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<StaffShift> staffShifts = new ArrayList<>();
 
     @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY)
     @Builder.Default
     private List<QueueTicket> queueTickets = new ArrayList<>();
 
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = OffsetDateTime.now();
-        }
+    @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<QueuePrediction> queuePredictions = new ArrayList<>();
 
+    @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<PredictionLog> predictionLogs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<CustomerFeedback> customerFeedbacks = new ArrayList<>();
+
+    @Override
+    protected void beforeCreate() {
         if (isActive == null) {
             isActive = true;
         }
@@ -101,10 +124,5 @@ public class Branch {
         if (isDeleted == null) {
             isDeleted = false;
         }
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
     }
 }

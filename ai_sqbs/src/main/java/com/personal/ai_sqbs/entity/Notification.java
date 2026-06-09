@@ -23,14 +23,17 @@ public class Notification {
     @Column(name = "notification_id")
     private Long notificationId;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id")
     private Booking booking;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "queue_ticket_id")
+    private QueueTicket queueTicket;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -51,8 +54,9 @@ public class Notification {
     @Column(name = "message", nullable = false, columnDefinition = "TEXT")
     private String message;
 
+    @NotNull
     @Size(max = 150)
-    @Column(name = "recipient_target", length = 150)
+    @Column(name = "recipient_target", nullable = false, length = 150)
     private String recipientTarget;
 
     @NotNull
@@ -74,16 +78,8 @@ public class Notification {
 
     @PrePersist
     protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = OffsetDateTime.now();
-        }
-
-        if (status == null) {
-            status = NotificationStatus.PENDING;
-        }
-
-        if (retryCount == null) {
-            retryCount = 0;
-        }
+        if (createdAt == null) createdAt = OffsetDateTime.now();
+        if (status == null) status = NotificationStatus.PENDING;
+        if (retryCount == null) retryCount = 0;
     }
 }

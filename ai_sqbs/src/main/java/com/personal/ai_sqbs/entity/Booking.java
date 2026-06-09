@@ -84,9 +84,16 @@ public class Booking {
     @OneToOne(mappedBy = "booking", fetch = FetchType.LAZY)
     private QueueTicket queueTicket;
 
+    @OneToOne(mappedBy = "booking", fetch = FetchType.LAZY)
+    private NoShowPrediction noShowPrediction;
+
     @OneToMany(mappedBy = "booking", fetch = FetchType.LAZY)
     @Builder.Default
     private List<Notification> notifications = new ArrayList<>();
+
+    @OneToMany(mappedBy = "booking", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<CustomerFeedback> customerFeedbacks = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

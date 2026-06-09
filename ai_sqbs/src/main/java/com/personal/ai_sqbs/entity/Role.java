@@ -1,5 +1,6 @@
 package com.personal.ai_sqbs.entity;
 
+import com.personal.ai_sqbs.base.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -16,7 +17,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "roles")
-public class Role {
+public class Role extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,26 +32,7 @@ public class Role {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @NotNull
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
-
     @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
     @Builder.Default
     private List<User> users = new ArrayList<>();
-
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = OffsetDateTime.now();
-        }
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
-    }
 }

@@ -1,11 +1,9 @@
 package com.personal.ai_sqbs.entity;
 
-
 import com.personal.ai_sqbs.constant.PredictionMethod;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -68,8 +66,6 @@ public class QueuePrediction {
 
     @PrePersist
     protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = OffsetDateTime.now();
-        }
+        if (createdAt == null) createdAt = OffsetDateTime.now();
     }
 }

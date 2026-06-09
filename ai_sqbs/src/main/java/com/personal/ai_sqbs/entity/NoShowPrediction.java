@@ -1,5 +1,6 @@
 package com.personal.ai_sqbs.entity;
 
+import com.personal.ai_sqbs.constant.NoShowRiskLevel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -17,40 +18,39 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "prediction_logs")
-public class PredictionLog {
+@Table(name = "no_show_predictions")
+public class NoShowPrediction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "prediction_log_id")
-    private Long predictionLogId;
+    @Column(name = "no_show_prediction_id")
+    private Long noShowPredictionId;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "branch_id", nullable = false)
-    private Branch branch;
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "booking_id", nullable = false, unique = true)
+    private Booking booking;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "service_type_id", nullable = false)
-    private ServiceType serviceType;
+    @Column(name = "probability", nullable = false, precision = 5, scale = 2)
+    private BigDecimal probability;
 
     @NotNull
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "input_data", nullable = false, columnDefinition = "jsonb")
-    private Map<String, Object> inputData;
-
-    @NotNull
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "output_data", nullable = false, columnDefinition = "jsonb")
-    private Map<String, Object> outputData;
-
-    @Column(name = "confidence_score", precision = 5, scale = 2)
-    private BigDecimal confidenceScore;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "risk_level", nullable = false, length = 30)
+    private NoShowRiskLevel riskLevel;
 
     @Size(max = 50)
     @Column(name = "model_version", length = 50)
     private String modelVersion;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "input_data", columnDefinition = "jsonb")
+    private Map<String, Object> inputData;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "output_data", columnDefinition = "jsonb")
+    private Map<String, Object> outputData;
 
     @NotNull
     @Column(name = "created_at", nullable = false)

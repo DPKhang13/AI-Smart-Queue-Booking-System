@@ -64,21 +64,33 @@ public class ServiceType {
 
     @OneToMany(mappedBy = "serviceType", fetch = FetchType.LAZY)
     @Builder.Default
+    private List<ServiceCapacitySlot> capacitySlots = new ArrayList<>();
+
+    @OneToMany(mappedBy = "serviceType", fetch = FetchType.LAZY)
+    @Builder.Default
     private List<Booking> bookings = new ArrayList<>();
+
+    @OneToMany(mappedBy = "serviceType", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<QueueTicket> queueTickets = new ArrayList<>();
+
+    @OneToMany(mappedBy = "serviceType", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<QueuePrediction> queuePredictions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "serviceType", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<PredictionLog> predictionLogs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "serviceType", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<CustomerFeedback> customerFeedbacks = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = OffsetDateTime.now();
-        }
-
-        if (isActive == null) {
-            isActive = true;
-        }
-
-        if (isDeleted == null) {
-            isDeleted = false;
-        }
+        if (createdAt == null) createdAt = OffsetDateTime.now();
+        if (isActive == null) isActive = true;
+        if (isDeleted == null) isDeleted = false;
     }
 
     @PreUpdate

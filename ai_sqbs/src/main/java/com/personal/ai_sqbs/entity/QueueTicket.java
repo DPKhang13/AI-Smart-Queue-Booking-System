@@ -1,6 +1,5 @@
 package com.personal.ai_sqbs.entity;
 
-
 import com.personal.ai_sqbs.constant.QueueStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -36,6 +35,11 @@ public class QueueTicket {
     @JoinColumn(name = "branch_id", nullable = false)
     private Branch branch;
 
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "service_type_id", nullable = false)
+    private ServiceType serviceType;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
     private User customer;
@@ -44,6 +48,10 @@ public class QueueTicket {
     @JoinColumn(name = "assigned_staff_id")
     private User assignedStaff;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "counter_id")
+    private Counter counter;
+
     @Size(max = 150)
     @Column(name = "guest_name", length = 150)
     private String guestName;
@@ -51,10 +59,6 @@ public class QueueTicket {
     @Size(max = 30)
     @Column(name = "guest_phone", length = 30)
     private String guestPhone;
-
-    @Size(max = 50)
-    @Column(name = "counter_name", length = 50)
-    private String counterName;
 
     @NotNull
     @Size(max = 30)
@@ -102,19 +106,18 @@ public class QueueTicket {
     @Builder.Default
     private List<QueueEvent> queueEvents = new ArrayList<>();
 
+    @OneToMany(mappedBy = "queueTicket", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Notification> notifications = new ArrayList<>();
+
+    @OneToOne(mappedBy = "queueTicket", fetch = FetchType.LAZY)
+    private CustomerFeedback customerFeedback;
+
     @PrePersist
     protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = OffsetDateTime.now();
-        }
-
-        if (status == null) {
-            status = QueueStatus.WAITING;
-        }
-
-        if (version == null) {
-            version = 1;
-        }
+        if (createdAt == null) createdAt = OffsetDateTime.now();
+        if (status == null) status = QueueStatus.WAITING;
+        if (version == null) version = 1;
     }
 
     @PreUpdate
