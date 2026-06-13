@@ -1,11 +1,13 @@
 package com.personal.ai_sqbs.entity;
 
 import com.personal.ai_sqbs.base.BaseEntity;
-import com.personal.ai_sqbs.constant.RevokedReason;
+import com.personal.ai_sqbs.enums.RevokedReason;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -36,7 +38,8 @@ public class RefreshToken extends BaseEntity {
 
     @NotNull
     @Size(min = 64, max = 64)
-    @Column(name = "token_hash", nullable = false, length = 64)
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(name = "token_hash", nullable = false, length = 64, columnDefinition = "CHAR(64)")
     private String tokenHash;
 
     @NotNull

@@ -1,4 +1,4 @@
-package com.personal.ai_sqbs.serviceImpl;
+package com.personal.ai_sqbs.service.impl;
 
 import com.personal.ai_sqbs.service.TokenHashService;
 import org.springframework.stereotype.Service;

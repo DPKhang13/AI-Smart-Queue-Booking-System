@@ -1,4 +1,4 @@
-package com.personal.ai_sqbs.serviceImpl;
+package com.personal.ai_sqbs.service.impl;
 
 import com.personal.ai_sqbs.config.JwtProperties;
 import com.personal.ai_sqbs.constant.RoleConstants;
@@ -11,6 +11,8 @@ import com.personal.ai_sqbs.entity.Role;
 import com.personal.ai_sqbs.entity.User;
 import com.personal.ai_sqbs.exception.AppException;
 import com.personal.ai_sqbs.exception.ErrorCode;
+import com.personal.ai_sqbs.mapper.AuthMapper;
+import com.personal.ai_sqbs.mapper.UserMapper;
 import com.personal.ai_sqbs.repository.RoleRepository;
 import com.personal.ai_sqbs.repository.UserRepository;
 import com.personal.ai_sqbs.security.JwtTokenProvider;
@@ -35,8 +37,6 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private static final String TOKEN_TYPE = "Bearer";
-
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
@@ -45,6 +45,8 @@ public class AuthServiceImpl implements AuthService {
     private final JwtProperties jwtProperties;
     private final RefreshTokenService refreshTokenService;
     private final CookieService cookieService;
+    private final UserMapper userMapper;
+    private final AuthMapper authMapper;
 
     @Override
     @Transactional
@@ -73,7 +75,7 @@ public class AuthServiceImpl implements AuthService {
                 .isDeleted(false)
                 .build();
 
-        return toUserSummary(userRepository.save(user));
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
     @Override
@@ -93,7 +95,7 @@ public class AuthServiceImpl implements AuthService {
         String refreshToken = refreshTokenService.createRefreshToken(principal, servletRequest);
         cookieService.addRefreshTokenCookie(servletResponse, refreshToken);
 
-        return toAuthResponse(accessToken, principal);
+        return authMapper.toAuthResponse(accessToken, jwtProperties.accessExpirationMs() / 1000, principal);
     }
 
     @Override
@@ -106,7 +108,7 @@ public class AuthServiceImpl implements AuthService {
         cookieService.addRefreshTokenCookie(response, rotation.rawRefreshToken());
         String accessToken = jwtTokenProvider.generateAccessToken(rotation.userPrincipal());
 
-        return toAuthResponse(accessToken, rotation.userPrincipal());
+        return authMapper.toAuthResponse(accessToken, jwtProperties.accessExpirationMs() / 1000, rotation.userPrincipal());
     }
 
     @Override
@@ -116,9 +118,7 @@ public class AuthServiceImpl implements AuthService {
                 .ifPresent(refreshTokenService::revokeCurrentRefreshToken);
         cookieService.clearRefreshTokenCookie(response);
 
-        return MessageResponse.builder()
-                .message("Logged out successfully")
-                .build();
+        return authMapper.toMessageResponse("Logged out successfully");
     }
 
     @Override
@@ -128,36 +128,7 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenService.revokeAllRefreshTokensForUser(principal.getUserId());
         cookieService.clearRefreshTokenCookie(response);
 
-        return MessageResponse.builder()
-                .message("Logged out from all devices successfully")
-                .build();
-    }
-
-    private AuthResponse toAuthResponse(String accessToken, UserPrincipal principal) {
-        UserResponse user = UserResponse.builder()
-                .userId(principal.getUserId())
-                .fullName(principal.getFullName())
-                .email(principal.getEmail())
-                .phone(principal.getPhone())
-                .role(principal.getRole())
-                .build();
-
-        return AuthResponse.builder()
-                .accessToken(accessToken)
-                .tokenType(TOKEN_TYPE)
-                .expiresIn(jwtProperties.accessExpirationMs() / 1000)
-                .user(user)
-                .build();
-    }
-
-    private UserResponse toUserSummary(User user) {
-        return UserResponse.builder()
-                .userId(user.getUserId())
-                .fullName(user.getFullName())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .role(user.getRole().getName())
-                .build();
+        return authMapper.toMessageResponse("Logged out from all devices successfully");
     }
 
     private UserPrincipal getCurrentPrincipal() {

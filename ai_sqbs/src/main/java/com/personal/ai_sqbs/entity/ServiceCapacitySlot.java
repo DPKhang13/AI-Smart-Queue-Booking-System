@@ -8,7 +8,6 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
 
 @Getter
 @Setter
@@ -64,7 +63,8 @@ public class ServiceCapacitySlot extends BaseEntity {
 
     @Override
     protected void beforeCreate() {
-        if (isActive == null) isActive = true;
+        if (isActive == null)
+            isActive = true;
     }
 
 }

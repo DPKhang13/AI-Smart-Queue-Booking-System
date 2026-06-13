@@ -1,7 +1,7 @@
 package com.personal.ai_sqbs.entity;
 
-import com.personal.ai_sqbs.constant.NotificationStatus;
-import com.personal.ai_sqbs.constant.NotificationType;
+import com.personal.ai_sqbs.enums.NotificationStatus;
+import com.personal.ai_sqbs.enums.NotificationType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

@@ -1,6 +1,8 @@
-package com.personal.ai_sqbs.security;
+package com.personal.ai_sqbs.filter;
 
 import com.personal.ai_sqbs.constant.SecurityConstants;
+import com.personal.ai_sqbs.security.CustomUserDetailsService;
+import com.personal.ai_sqbs.security.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

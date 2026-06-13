@@ -1,4 +1,4 @@
-package com.personal.ai_sqbs.security;
+package com.personal.ai_sqbs.filter;
 
 import com.personal.ai_sqbs.config.CorsProperties;
 import com.personal.ai_sqbs.constant.SecurityConstants;

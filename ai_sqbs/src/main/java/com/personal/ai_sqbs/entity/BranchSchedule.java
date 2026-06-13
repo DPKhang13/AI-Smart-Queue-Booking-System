@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
 
 @Getter
 @Setter
@@ -44,7 +43,8 @@ public class BranchSchedule extends BaseEntity {
 
     @Override
     protected void beforeCreate() {
-        if (isClosed == null) isClosed = false;
+        if (isClosed == null)
+            isClosed = false;
     }
 
 }

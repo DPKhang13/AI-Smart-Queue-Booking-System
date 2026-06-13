@@ -1,6 +1,7 @@
-package com.personal.ai_sqbs.exception;
+package com.personal.ai_sqbs.handler;
 
 import com.personal.ai_sqbs.dto.auth.response.ErrorResponse;
+import com.personal.ai_sqbs.exception.AppException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

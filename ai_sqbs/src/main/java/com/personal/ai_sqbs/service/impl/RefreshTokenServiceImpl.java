@@ -1,8 +1,8 @@
-package com.personal.ai_sqbs.serviceImpl;
+package com.personal.ai_sqbs.service.impl;
 
-import com.personal.ai_sqbs.constant.RevokedReason;
 import com.personal.ai_sqbs.entity.RefreshToken;
 import com.personal.ai_sqbs.entity.User;
+import com.personal.ai_sqbs.enums.RevokedReason;
 import com.personal.ai_sqbs.exception.AppException;
 import com.personal.ai_sqbs.exception.ErrorCode;
 import com.personal.ai_sqbs.repository.RefreshTokenRepository;
@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -122,7 +123,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     @Transactional
     public void revokeAllRefreshTokensForUser(Long userId) {
-        refreshTokenRepository.revokeActiveTokensByUserId(userId, OffsetDateTime.now(), RevokedReason.LOGOUT_ALL);
+        revokeTokens(
+                refreshTokenRepository.findAllByUserUserIdAndRevokedAtIsNull(userId),
+                OffsetDateTime.now(),
+                RevokedReason.LOGOUT_ALL
+        );
     }
 
     private void validateRefreshJwt(String rawRefreshToken) {
@@ -147,14 +152,21 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
         if (!withinGraceWindow) {
             oldToken.setReuseDetectedAt(now);
-            refreshTokenRepository.revokeActiveTokensByTokenFamilyId(
-                    oldToken.getTokenFamilyId(),
+            revokeTokens(
+                    refreshTokenRepository.findAllByTokenFamilyIdAndRevokedAtIsNull(oldToken.getTokenFamilyId()),
                     now,
                     RevokedReason.REUSE_DETECTED
             );
         }
 
         throw new AppException(ErrorCode.UNAUTHORIZED);
+    }
+
+    private void revokeTokens(List<RefreshToken> refreshTokens, OffsetDateTime revokedAt, RevokedReason revokedReason) {
+        refreshTokens.forEach(refreshToken -> {
+            refreshToken.setRevokedAt(revokedAt);
+            refreshToken.setRevokedReason(revokedReason);
+        });
     }
 
     private OffsetDateTime toOffsetDateTime(java.time.Instant instant) {

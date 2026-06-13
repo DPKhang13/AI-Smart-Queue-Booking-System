@@ -1,4 +1,4 @@
-package com.personal.ai_sqbs.serviceImpl;
+package com.personal.ai_sqbs.service.impl;
 
 import com.personal.ai_sqbs.config.CookieProperties;
 import com.personal.ai_sqbs.constant.CookieConstants;

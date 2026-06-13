@@ -1,10 +1,10 @@
 package com.personal.ai_sqbs.config;
 
 import com.personal.ai_sqbs.constant.RoleConstants;
-import com.personal.ai_sqbs.security.AuthCookieGuardFilter;
 import com.personal.ai_sqbs.security.CustomAccessDeniedHandler;
 import com.personal.ai_sqbs.security.CustomAuthenticationEntryPoint;
-import com.personal.ai_sqbs.security.JwtAuthenticationFilter;
+import com.personal.ai_sqbs.filter.AuthCookieGuardFilter;
+import com.personal.ai_sqbs.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -5,3 +5,10 @@ app:
     http-only: true
     secure: false
     same-site: Strict
+
+spring:
+  docker:
+    compose:
+      enabled: false
+  flyway:
+    baseline-on-migrate: true
