@@ -1,0 +1,7 @@
+app:
+  cookie:
+    refresh-token-name: __Host-sq_refresh_token
+    refresh-token-path: /
+    http-only: true
+    secure: true
+    same-site: Strict

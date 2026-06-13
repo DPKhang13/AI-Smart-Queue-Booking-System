@@ -1,0 +1,7 @@
+app:
+  cookie:
+    refresh-token-name: sq_refresh_token
+    refresh-token-path: /api/auth
+    http-only: true
+    secure: false
+    same-site: Strict
