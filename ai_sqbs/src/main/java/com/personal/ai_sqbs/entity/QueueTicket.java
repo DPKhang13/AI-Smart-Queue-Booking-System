@@ -1,7 +1,7 @@
 package com.personal.ai_sqbs.entity;
 
 import com.personal.ai_sqbs.base.BaseEntity;
-import com.personal.ai_sqbs.constant.QueueStatus;
+import com.personal.ai_sqbs.enums.QueueStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;

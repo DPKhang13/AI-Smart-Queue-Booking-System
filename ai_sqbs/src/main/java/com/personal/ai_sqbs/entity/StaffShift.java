@@ -1,7 +1,7 @@
 package com.personal.ai_sqbs.entity;
 
 import com.personal.ai_sqbs.base.BaseEntity;
-import com.personal.ai_sqbs.constant.StaffShiftStatus;
+import com.personal.ai_sqbs.enums.StaffShiftStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;

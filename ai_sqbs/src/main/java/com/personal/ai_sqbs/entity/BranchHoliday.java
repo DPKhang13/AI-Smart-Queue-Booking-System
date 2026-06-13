@@ -8,7 +8,6 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
 
 @Getter
 @Setter
@@ -50,7 +49,8 @@ public class BranchHoliday extends BaseEntity {
 
     @Override
     protected void beforeCreate() {
-        if (isClosed == null) isClosed = true;
+        if (isClosed == null)
+            isClosed = true;
     }
 
 }

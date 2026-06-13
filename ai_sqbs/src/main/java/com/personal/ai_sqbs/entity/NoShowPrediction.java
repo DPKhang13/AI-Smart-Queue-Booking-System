@@ -1,6 +1,6 @@
 package com.personal.ai_sqbs.entity;
 
-import com.personal.ai_sqbs.constant.NoShowRiskLevel;
+import com.personal.ai_sqbs.enums.NoShowRiskLevel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

@@ -1,4 +1,4 @@
-package com.personal.ai_sqbs.constant;
+package com.personal.ai_sqbs.enums;
 
 public enum NotificationType {
     BOOKING_CONFIRMATION,
