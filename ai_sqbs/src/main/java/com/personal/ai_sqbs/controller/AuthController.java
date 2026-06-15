@@ -1,11 +1,13 @@
 package com.personal.ai_sqbs.controller;
 
 import com.personal.ai_sqbs.dto.auth.request.LoginRequest;
+import com.personal.ai_sqbs.dto.auth.request.ResendOtpRequest;
 import com.personal.ai_sqbs.dto.auth.request.RegisterRequest;
+import com.personal.ai_sqbs.dto.auth.request.VerifyOtpRequest;
 import com.personal.ai_sqbs.dto.auth.response.AuthResponse;
 import com.personal.ai_sqbs.dto.auth.response.MessageResponse;
-import com.personal.ai_sqbs.dto.auth.response.UserResponse;
 import com.personal.ai_sqbs.service.AuthService;
+import com.personal.ai_sqbs.service.EmailVerificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -20,10 +22,21 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final EmailVerificationService emailVerificationService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<MessageResponse> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<MessageResponse> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        return ResponseEntity.ok(emailVerificationService.verifyOtp(request));
+    }
+
+    @PostMapping("/resend-otp")
+    public ResponseEntity<MessageResponse> resendOtp(@Valid @RequestBody ResendOtpRequest request) {
+        return ResponseEntity.ok(emailVerificationService.resendOtp(request));
     }
 
     @PostMapping("/login")

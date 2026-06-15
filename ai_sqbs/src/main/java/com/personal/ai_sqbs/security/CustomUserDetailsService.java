@@ -23,6 +23,10 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("User not found");
         }
 
+        if (!Boolean.TRUE.equals(user.getEmailVerified())) {
+            throw new UsernameNotFoundException("User not found");
+        }
+
         return UserPrincipal.from(user);
     }
 }

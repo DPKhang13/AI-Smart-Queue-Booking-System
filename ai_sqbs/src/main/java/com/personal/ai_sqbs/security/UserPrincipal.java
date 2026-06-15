@@ -26,7 +26,9 @@ public class UserPrincipal implements UserDetails {
         this.phone = user.getPhone();
         this.passwordHash = user.getPasswordHash();
         this.role = user.getRole().getName();
-        this.enabled = Boolean.TRUE.equals(user.getIsActive()) && !Boolean.TRUE.equals(user.getIsDeleted());
+        this.enabled = Boolean.TRUE.equals(user.getIsActive())
+                && !Boolean.TRUE.equals(user.getIsDeleted())
+                && Boolean.TRUE.equals(user.getEmailVerified());
         this.authorities = List.of(new SimpleGrantedAuthority(toAuthorityName(role)));
     }
 
