@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -61,6 +63,34 @@ public class User extends BaseEntity {
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
 
+    @NotNull
+    @Builder.Default
+    @Column(name = "email_verified", nullable = false)
+    private Boolean emailVerified = false;
+
+    @Column(name = "email_verified_at")
+    private OffsetDateTime emailVerifiedAt;
+
+    @Size(max = 64)
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(
+            name = "email_verification_otp_hash",
+            length = 64,
+            columnDefinition = "CHAR(64)"
+    )
+    private String emailVerificationOtpHash;
+
+    @Column(name = "email_verification_otp_expires_at")
+    private OffsetDateTime emailVerificationOtpExpiresAt;
+
+    @Column(name = "email_verification_otp_sent_at")
+    private OffsetDateTime emailVerificationOtpSentAt;
+
+    @NotNull
+    @Builder.Default
+    @Column(name = "email_verification_attempt_count", nullable = false)
+    private Integer emailVerificationAttemptCount = 0;
+
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @Builder.Default
     private List<Booking> bookings = new ArrayList<>();
@@ -105,6 +135,14 @@ public class User extends BaseEntity {
 
         if (isDeleted == null) {
             isDeleted = false;
+        }
+
+        if (emailVerified == null) {
+            emailVerified = false;
+        }
+
+        if (emailVerificationAttemptCount == null) {
+            emailVerificationAttemptCount = 0;
         }
     }
 }

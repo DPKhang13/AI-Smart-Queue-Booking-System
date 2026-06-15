@@ -39,6 +39,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public String createRefreshToken(UserPrincipal userPrincipal, HttpServletRequest request) {
         User user = userRepository.findById(userPrincipal.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
+        validateVerifiedUser(user);
 
         String tokenJti = UUID.randomUUID().toString();
         UUID tokenFamilyId = UUID.randomUUID();
@@ -80,6 +81,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
+        validateVerifiedUser(oldToken.getUser());
         UserPrincipal userPrincipal = UserPrincipal.from(oldToken.getUser());
         String newJti = UUID.randomUUID().toString();
         String newRawRefreshToken = jwtTokenProvider.generateRefreshToken(userPrincipal, newJti, oldToken.getTokenFamilyId());
@@ -141,6 +143,14 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     private void validateTokenHash(RefreshToken refreshToken, String rawRefreshToken) {
         String tokenHash = tokenHashService.sha256(rawRefreshToken);
         if (!refreshToken.getTokenHash().equals(tokenHash)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+    }
+
+    private void validateVerifiedUser(User user) {
+        if (!Boolean.TRUE.equals(user.getIsActive())
+                || Boolean.TRUE.equals(user.getIsDeleted())
+                || !Boolean.TRUE.equals(user.getEmailVerified())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
     }

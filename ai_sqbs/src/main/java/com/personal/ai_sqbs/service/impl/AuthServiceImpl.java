@@ -6,19 +6,18 @@ import com.personal.ai_sqbs.dto.auth.request.LoginRequest;
 import com.personal.ai_sqbs.dto.auth.request.RegisterRequest;
 import com.personal.ai_sqbs.dto.auth.response.AuthResponse;
 import com.personal.ai_sqbs.dto.auth.response.MessageResponse;
-import com.personal.ai_sqbs.dto.auth.response.UserResponse;
 import com.personal.ai_sqbs.entity.Role;
 import com.personal.ai_sqbs.entity.User;
 import com.personal.ai_sqbs.exception.AppException;
 import com.personal.ai_sqbs.exception.ErrorCode;
 import com.personal.ai_sqbs.mapper.AuthMapper;
-import com.personal.ai_sqbs.mapper.UserMapper;
 import com.personal.ai_sqbs.repository.RoleRepository;
 import com.personal.ai_sqbs.repository.UserRepository;
 import com.personal.ai_sqbs.security.JwtTokenProvider;
 import com.personal.ai_sqbs.security.UserPrincipal;
 import com.personal.ai_sqbs.service.AuthService;
 import com.personal.ai_sqbs.service.CookieService;
+import com.personal.ai_sqbs.service.EmailVerificationService;
 import com.personal.ai_sqbs.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -45,21 +44,21 @@ public class AuthServiceImpl implements AuthService {
     private final JwtProperties jwtProperties;
     private final RefreshTokenService refreshTokenService;
     private final CookieService cookieService;
-    private final UserMapper userMapper;
     private final AuthMapper authMapper;
+    private final EmailVerificationService emailVerificationService;
 
     @Override
     @Transactional
-    public UserResponse register(RegisterRequest request) {
+    public MessageResponse register(RegisterRequest request) {
         String email = request.getEmail().trim().toLowerCase();
         String phone = normalizePhone(request.getPhone());
 
         if (userRepository.existsByEmail(email)) {
-            throw new AppException(ErrorCode.CONFLICT, "Email is already in use");
+            throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         if (phone != null && userRepository.existsByPhone(phone)) {
-            throw new AppException(ErrorCode.CONFLICT, "Phone is already in use");
+            throw new AppException(ErrorCode.PHONE_ALREADY_EXISTS);
         }
 
         Role role = roleRepository.findByName(RoleConstants.USER)
@@ -73,18 +72,31 @@ public class AuthServiceImpl implements AuthService {
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .isActive(true)
                 .isDeleted(false)
+                .emailVerified(false)
                 .build();
 
-        return userMapper.toUserResponse(userRepository.save(user));
+        User savedUser = userRepository.save(user);
+        emailVerificationService.sendVerificationOtp(savedUser);
+
+        return authMapper.toMessageResponse(
+                "Registration successful. Please check your email to verify your account."
+        );
     }
 
     @Override
     @Transactional
     public AuthResponse login(LoginRequest request, HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
+        String email = request.getEmail().trim().toLowerCase();
+        userRepository.findByEmail(email)
+                .filter(user -> !Boolean.TRUE.equals(user.getEmailVerified()))
+                .ifPresent(user -> {
+                    throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
+                });
+
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail().trim().toLowerCase(), request.getPassword())
+                    new UsernamePasswordAuthenticationToken(email, request.getPassword())
             );
         } catch (RuntimeException exception) {
             throw new BadCredentialsException("Invalid email or password");
@@ -108,7 +120,11 @@ public class AuthServiceImpl implements AuthService {
         cookieService.addRefreshTokenCookie(response, rotation.rawRefreshToken());
         String accessToken = jwtTokenProvider.generateAccessToken(rotation.userPrincipal());
 
-        return authMapper.toAuthResponse(accessToken, jwtProperties.accessExpirationMs() / 1000, rotation.userPrincipal());
+        return authMapper.toAuthResponse(
+                accessToken,
+                jwtProperties.accessExpirationMs() / 1000,
+                rotation.userPrincipal()
+        );
     }
 
     @Override

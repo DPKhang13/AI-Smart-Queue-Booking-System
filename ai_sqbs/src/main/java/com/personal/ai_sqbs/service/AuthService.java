@@ -4,13 +4,12 @@ import com.personal.ai_sqbs.dto.auth.request.LoginRequest;
 import com.personal.ai_sqbs.dto.auth.request.RegisterRequest;
 import com.personal.ai_sqbs.dto.auth.response.AuthResponse;
 import com.personal.ai_sqbs.dto.auth.response.MessageResponse;
-import com.personal.ai_sqbs.dto.auth.response.UserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public interface AuthService {
 
-    UserResponse register(RegisterRequest request);
+    MessageResponse register(RegisterRequest request);
 
     AuthResponse login(LoginRequest request, HttpServletRequest servletRequest, HttpServletResponse servletResponse);
 
