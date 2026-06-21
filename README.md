@@ -19,7 +19,7 @@ Backend-focused smart booking and queue management system built with Java Spring
 
 # Project Overview
 
-AI Smart Queue & Booking System is a backend-focused portfolio project designed to simulate a production-style booking and queue management platform for service-based businesses such as:
+The AI Smart Queue & Booking System is a backend-focused project designed to simulate a production-style booking and queue management platform for service-based businesses such as:
 
 - Cafés
 - Clinics
