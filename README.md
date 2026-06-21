@@ -35,8 +35,6 @@ The system allows users to:
 - View estimated waiting time
 - Get AI-based booking recommendations
 
-This project was intentionally designed to demonstrate real-world backend engineering concepts instead of a traditional university CRUD assignment.
-
 ---
 
 # Why This Project Matters
