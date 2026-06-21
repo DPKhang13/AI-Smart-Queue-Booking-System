@@ -29,7 +29,24 @@ public enum ErrorCode {
     SERVICE_TYPE_ALREADY_EXISTS(HttpStatus.CONFLICT, "Service type already exists"),
     SERVICE_TYPE_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "Service type is already deleted"),
     SERVICE_TYPE_INACTIVE(HttpStatus.BAD_REQUEST, "Service type is inactive"),
+    SERVICE_TYPE_NOT_BELONG_TO_BRANCH(HttpStatus.BAD_REQUEST, "Service type does not belong to selected branch"),
     INVALID_SERVICE_DURATION(HttpStatus.BAD_REQUEST, "Estimated duration must be greater than 0"),
+    //Branch Schedule
+    BRANCH_SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "Branch schedule not found"),
+    BRANCH_SCHEDULE_ALREADY_EXISTS(HttpStatus.CONFLICT, "Branch schedule already exists for this day"),
+    INVALID_BRANCH_SCHEDULE_TIME(HttpStatus.BAD_REQUEST, "Branch schedule time is invalid"),
+    //Branch Holiday
+    BRANCH_HOLIDAY_NOT_FOUND(HttpStatus.NOT_FOUND, "Branch holiday not found"),
+    BRANCH_HOLIDAY_ALREADY_EXISTS(HttpStatus.CONFLICT, "Branch holiday already exists for this date"),
+    INVALID_BRANCH_HOLIDAY_TIME(HttpStatus.BAD_REQUEST, "Branch holiday time is invalid"),
+    //Service Capacity Slot
+    CAPACITY_SLOT_NOT_FOUND(HttpStatus.NOT_FOUND, "Service capacity slot not found"),
+    INVALID_CAPACITY_SLOT_DATE_RULE(HttpStatus.BAD_REQUEST, "Provide either dayOfWeek or specificDate, not both"),
+    INVALID_CAPACITY_SLOT_TIME(HttpStatus.BAD_REQUEST, "Capacity slot start time must be before end time"),
+    INVALID_CAPACITY_VALUE(HttpStatus.BAD_REQUEST, "Capacity values must be zero or greater"),
+    //Counter
+    COUNTER_NOT_FOUND(HttpStatus.NOT_FOUND, "Counter not found"),
+    COUNTER_ALREADY_EXISTS(HttpStatus.CONFLICT, "Counter already exists in this branch"),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "Access denied"),
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "Validation error"),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");

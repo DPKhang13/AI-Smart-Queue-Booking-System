@@ -54,12 +54,21 @@ CREATE TABLE users (
 
     full_name VARCHAR(150) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
+    username VARCHAR(50),
     phone VARCHAR(30) UNIQUE,
+    avatar_url VARCHAR(500),
     password_hash VARCHAR(255) NOT NULL,
 
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
     deleted_at TIMESTAMPTZ,
+
+    email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+    email_verified_at TIMESTAMPTZ,
+    email_verification_otp_hash CHAR(64),
+    email_verification_otp_expires_at TIMESTAMPTZ,
+    email_verification_otp_sent_at TIMESTAMPTZ,
+    email_verification_attempt_count INT NOT NULL DEFAULT 0,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ,
@@ -70,7 +79,38 @@ CREATE TABLE users (
 );
 
 -- ============================================================
--- 4. BRANCH SCHEDULES
+-- 4. REFRESH TOKENS
+-- ============================================================
+
+CREATE TABLE refresh_tokens (
+    refresh_token_id BIGSERIAL PRIMARY KEY,
+
+    user_id BIGINT NOT NULL,
+
+    token_jti VARCHAR(100) UNIQUE NOT NULL,
+    token_hash CHAR(64) NOT NULL,
+    token_family_id UUID NOT NULL,
+    parent_jti VARCHAR(100),
+    rotated_to_jti VARCHAR(100),
+
+    expires_at TIMESTAMPTZ NOT NULL,
+    revoked_at TIMESTAMPTZ,
+    revoked_reason VARCHAR(30),
+    reuse_detected_at TIMESTAMPTZ,
+
+    user_agent TEXT,
+    ip_address VARCHAR(100),
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ,
+
+    CONSTRAINT fk_refresh_tokens_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+);
+
+-- ============================================================
+-- 5. BRANCH SCHEDULES
 -- ============================================================
 
 CREATE TABLE branch_schedules (
@@ -97,7 +137,7 @@ CREATE TABLE branch_schedules (
 );
 
 -- ============================================================
--- 5. BRANCH HOLIDAYS
+-- 6. BRANCH HOLIDAYS
 -- ============================================================
 
 CREATE TABLE branch_holidays (
@@ -124,7 +164,7 @@ CREATE TABLE branch_holidays (
 );
 
 -- ============================================================
--- 6. SERVICE TYPES
+-- 7. SERVICE TYPES
 -- ============================================================
 
 CREATE TABLE service_types (
@@ -149,7 +189,7 @@ CREATE TABLE service_types (
 );
 
 -- ============================================================
--- 7. SERVICE CAPACITY SLOTS
+-- 8. SERVICE CAPACITY SLOTS
 -- ============================================================
 
 CREATE TABLE service_capacity_slots (
@@ -182,7 +222,7 @@ CREATE TABLE service_capacity_slots (
 );
 
 -- ============================================================
--- 8. BOOKINGS
+-- 9. BOOKINGS
 -- ============================================================
 
 CREATE TABLE bookings (
@@ -225,7 +265,7 @@ CREATE TABLE bookings (
 );
 
 -- ============================================================
--- 9. COUNTERS
+-- 10. COUNTERS
 -- ============================================================
 
 CREATE TABLE counters (
@@ -250,7 +290,7 @@ CREATE TABLE counters (
 );
 
 -- ============================================================
--- 10. STAFF SHIFTS
+-- 11. STAFF SHIFTS
 -- ============================================================
 
 CREATE TABLE staff_shifts (
@@ -278,7 +318,7 @@ CREATE TABLE staff_shifts (
 );
 
 -- ============================================================
--- 11. COUNTER ASSIGNMENTS
+-- 12. COUNTER ASSIGNMENTS
 -- ============================================================
 
 CREATE TABLE counter_assignments (
@@ -308,7 +348,7 @@ CREATE TABLE counter_assignments (
 );
 
 -- ============================================================
--- 12. QUEUE TICKETS
+-- 13. QUEUE TICKETS
 -- ============================================================
 
 CREATE TABLE queue_tickets (
@@ -371,7 +411,7 @@ CREATE TABLE queue_tickets (
 );
 
 -- ============================================================
--- 13. QUEUE EVENTS
+-- 14. QUEUE EVENTS
 -- ============================================================
 
 CREATE TABLE queue_events (
@@ -398,7 +438,7 @@ CREATE TABLE queue_events (
 );
 
 -- ============================================================
--- 14. NO-SHOW PREDICTIONS
+-- 15. NO-SHOW PREDICTIONS
 -- ============================================================
 
 CREATE TABLE no_show_predictions (
@@ -421,7 +461,7 @@ CREATE TABLE no_show_predictions (
 );
 
 -- ============================================================
--- 15. NOTIFICATIONS
+-- 16. NOTIFICATIONS
 -- ============================================================
 
 CREATE TABLE notifications (
@@ -460,7 +500,7 @@ CREATE TABLE notifications (
 );
 
 -- ============================================================
--- 16. QUEUE PREDICTIONS
+-- 17. QUEUE PREDICTIONS
 -- ============================================================
 
 CREATE TABLE queue_predictions (
@@ -490,7 +530,7 @@ CREATE TABLE queue_predictions (
 );
 
 -- ============================================================
--- 17. PREDICTION LOGS
+-- 18. PREDICTION LOGS
 -- ============================================================
 
 CREATE TABLE prediction_logs (
@@ -517,7 +557,7 @@ CREATE TABLE prediction_logs (
 );
 
 -- ============================================================
--- 18. CUSTOMER FEEDBACKS
+-- 19. CUSTOMER FEEDBACKS
 -- ============================================================
 
 CREATE TABLE customer_feedbacks (
@@ -557,7 +597,7 @@ CREATE TABLE customer_feedbacks (
 );
 
 -- ============================================================
--- 19. AUDIT LOGS
+-- 20. AUDIT LOGS
 -- ============================================================
 
 CREATE TABLE audit_logs (
@@ -580,7 +620,7 @@ CREATE TABLE audit_logs (
 );
 
 -- ============================================================
--- 20. INDEXES
+-- 21. INDEXES
 -- ============================================================
 
 -- USERS
@@ -589,6 +629,30 @@ ON users(role_id);
 
 CREATE INDEX idx_users_active_deleted
 ON users(is_active, is_deleted);
+
+CREATE UNIQUE INDEX uq_users_username_lower
+ON users(LOWER(username))
+WHERE username IS NOT NULL;
+
+CREATE INDEX idx_users_email_verified
+ON users(email_verified);
+
+CREATE INDEX idx_users_email_verification_otp_expires_at
+ON users(email_verification_otp_expires_at);
+
+-- REFRESH TOKENS
+CREATE INDEX idx_refresh_tokens_user_id
+ON refresh_tokens(user_id);
+
+CREATE INDEX idx_refresh_tokens_token_family_id
+ON refresh_tokens(token_family_id);
+
+CREATE INDEX idx_refresh_tokens_expires_at
+ON refresh_tokens(expires_at);
+
+CREATE INDEX idx_refresh_tokens_active_lookup
+ON refresh_tokens(user_id, expires_at)
+WHERE revoked_at IS NULL AND reuse_detected_at IS NULL;
 
 -- BRANCHES
 CREATE INDEX idx_branches_active_deleted
@@ -829,6 +893,28 @@ CHECK (
   (is_deleted = TRUE AND deleted_at IS NOT NULL)
 );
 
+ALTER TABLE users
+ADD CONSTRAINT chk_users_email_verification_attempt_count
+CHECK (email_verification_attempt_count >= 0);
+
+ALTER TABLE users
+ADD CONSTRAINT chk_users_email_verified_at
+CHECK (
+  email_verified = FALSE
+  OR (email_verified = TRUE AND email_verified_at IS NOT NULL)
+);
+
+ALTER TABLE refresh_tokens
+ADD CONSTRAINT chk_refresh_tokens_revoked_reason
+CHECK (
+  revoked_reason IS NULL
+  OR revoked_reason IN ('LOGOUT', 'LOGOUT_ALL', 'ROTATED', 'REUSE_DETECTED', 'EXPIRED')
+);
+
+ALTER TABLE refresh_tokens
+ADD CONSTRAINT chk_refresh_token_expiry
+CHECK (expires_at > created_at);
+
 ALTER TABLE branches
 ADD CONSTRAINT chk_branches_deleted_at
 CHECK (
@@ -844,6 +930,22 @@ CHECK (
   OR
   (is_deleted = TRUE AND deleted_at IS NOT NULL)
 );
+
+ALTER TABLE branch_schedules
+    ADD CONSTRAINT chk_branch_schedule_day_of_week
+        CHECK (day_of_week BETWEEN 1 AND 7);
+
+ALTER TABLE staff_shifts
+ADD CONSTRAINT chk_staff_shift_status
+CHECK (status IN ('SCHEDULED', 'ACTIVE', 'COMPLETED', 'CANCELLED'));
+
+ALTER TABLE no_show_predictions
+ADD CONSTRAINT chk_no_show_risk_level
+CHECK (risk_level IN ('LOW', 'MEDIUM', 'HIGH'));
+
+ALTER TABLE no_show_predictions
+ADD CONSTRAINT chk_no_show_probability
+CHECK (probability >= 0 AND probability <= 100);
 
 -- Walk-in / customer ownership.
 ALTER TABLE queue_tickets
@@ -877,6 +979,14 @@ CHECK (
 ALTER TABLE service_capacity_slots
 ADD CONSTRAINT chk_capacity_slots_time_range
 CHECK (start_time < end_time);
+
+ALTER TABLE service_capacity_slots
+ADD CONSTRAINT chk_capacity_slots_max_bookings
+CHECK (max_bookings > 0);
+
+ALTER TABLE service_capacity_slots
+ADD CONSTRAINT chk_capacity_slots_max_queue_tickets
+CHECK (max_queue_tickets IS NULL OR max_queue_tickets > 0);
 
 -- Queue ticket time order.
 ALTER TABLE queue_tickets
