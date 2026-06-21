@@ -13,7 +13,9 @@ public class UserPrincipal implements UserDetails {
     private final Long userId;
     private final String fullName;
     private final String email;
+    private final String username;
     private final String phone;
+    private final String avatarUrl;
     private final String passwordHash;
     private final String role;
     private final boolean enabled;
@@ -23,7 +25,9 @@ public class UserPrincipal implements UserDetails {
         this.userId = user.getUserId();
         this.fullName = user.getFullName();
         this.email = user.getEmail();
+        this.username = user.getUsername();
         this.phone = user.getPhone();
+        this.avatarUrl = user.getAvatarUrl();
         this.passwordHash = user.getPasswordHash();
         this.role = user.getRole().getName();
         this.enabled = Boolean.TRUE.equals(user.getIsActive())
@@ -48,8 +52,16 @@ public class UserPrincipal implements UserDetails {
         return email;
     }
 
+    public String getLoginUsername() {
+        return username;
+    }
+
     public String getPhone() {
         return phone;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
     }
 
     public String getRole() {
@@ -68,7 +80,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return username != null ? username : email;
     }
 
     @Override

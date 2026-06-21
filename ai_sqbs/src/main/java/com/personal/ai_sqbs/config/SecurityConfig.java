@@ -54,7 +54,16 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout", "/api/auth/logout-all").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
-                        // Future booking, queue, branch, prediction, and feedback modules should add
+                        .requestMatchers(HttpMethod.POST, "/api/branches/**").hasRole(RoleConstants.ADMIN)
+                        .requestMatchers(HttpMethod.PUT, "/api/branches/**").hasRole(RoleConstants.ADMIN)
+                        .requestMatchers(HttpMethod.DELETE, "/api/branches/**").hasRole(RoleConstants.ADMIN)
+                        .requestMatchers(HttpMethod.PATCH, "/api/branches/**").hasRole(RoleConstants.ADMIN)
+                        .requestMatchers(HttpMethod.GET, "/api/branches/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/service-types/**").hasRole(RoleConstants.ADMIN)
+                        .requestMatchers(HttpMethod.DELETE, "/api/service-types/**").hasRole(RoleConstants.ADMIN)
+                        .requestMatchers(HttpMethod.PATCH, "/api/service-types/**").hasRole(RoleConstants.ADMIN)
+                        .requestMatchers(HttpMethod.GET, "/api/service-types/**").authenticated()
+                        // Future booking, queue, prediction, and feedback modules should add
                         // role rules here.
                         .requestMatchers("/api/admin/**").hasRole(RoleConstants.ADMIN)
                         .requestMatchers("/api/staff/**").hasAnyRole(RoleConstants.STAFF, RoleConstants.ADMIN)
