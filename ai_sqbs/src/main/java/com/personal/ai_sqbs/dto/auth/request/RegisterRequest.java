@@ -24,6 +24,13 @@ public class RegisterRequest {
     @Size(max = 150, message = "Email must not exceed 150 characters")
     private String email;
 
+    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    @Pattern(
+            regexp = "^[a-zA-Z0-9._-]{3,50}$|^$",
+            message = "Username can contain letters, numbers, dots, underscores, and hyphens"
+    )
+    private String username;
+
     @Size(max = 30, message = "Phone must not exceed 30 characters")
     @Pattern(
             regexp = "^(\\+?[0-9][0-9 .()\\-]{7,29})?$",

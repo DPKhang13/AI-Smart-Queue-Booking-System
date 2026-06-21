@@ -15,6 +15,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @EntityGraph(attributePaths = "role")
     Optional<User> findByEmail(String email);
 
+    @EntityGraph(attributePaths = "role")
+    @Query("""
+            SELECT u FROM User u
+            WHERE LOWER(u.email) = :identifier
+               OR LOWER(u.username) = :identifier
+            """)
+    Optional<User> findByEmailOrUsername(@Param("identifier") String identifier);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT u FROM User u WHERE u.email = :email")
     Optional<User> findByEmailForUpdate(@Param("email") String email);
@@ -23,6 +31,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findWithRoleByUserId(Long userId);
 
     boolean existsByEmail(String email);
+
+    boolean existsByUsernameIgnoreCase(String username);
 
     boolean existsByPhone(String phone);
 }

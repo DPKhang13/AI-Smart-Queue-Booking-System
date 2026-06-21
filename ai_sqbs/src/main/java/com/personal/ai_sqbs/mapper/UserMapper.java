@@ -13,7 +13,9 @@ public class UserMapper {
                 .userId(user.getUserId())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
+                .username(user.getUsername())
                 .phone(user.getPhone())
+                .avatarUrl(user.getAvatarUrl())
                 .role(user.getRole().getName())
                 .build();
     }
@@ -23,7 +25,9 @@ public class UserMapper {
                 .userId(principal.getUserId())
                 .fullName(principal.getFullName())
                 .email(principal.getEmail())
+                .username(principal.getLoginUsername())
                 .phone(principal.getPhone())
+                .avatarUrl(principal.getAvatarUrl())
                 .role(principal.getRole())
                 .build();
     }
