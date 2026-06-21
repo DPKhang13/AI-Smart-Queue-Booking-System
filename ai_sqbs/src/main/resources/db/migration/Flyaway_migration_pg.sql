@@ -137,7 +137,7 @@ CREATE TABLE branch_schedules (
 );
 
 -- ============================================================
--- 5. BRANCH HOLIDAYS
+-- 6. BRANCH HOLIDAYS
 -- ============================================================
 
 CREATE TABLE branch_holidays (
@@ -164,7 +164,7 @@ CREATE TABLE branch_holidays (
 );
 
 -- ============================================================
--- 6. SERVICE TYPES
+-- 7. SERVICE TYPES
 -- ============================================================
 
 CREATE TABLE service_types (
@@ -189,7 +189,7 @@ CREATE TABLE service_types (
 );
 
 -- ============================================================
--- 7. SERVICE CAPACITY SLOTS
+-- 8. SERVICE CAPACITY SLOTS
 -- ============================================================
 
 CREATE TABLE service_capacity_slots (
@@ -222,7 +222,7 @@ CREATE TABLE service_capacity_slots (
 );
 
 -- ============================================================
--- 8. BOOKINGS
+-- 9. BOOKINGS
 -- ============================================================
 
 CREATE TABLE bookings (
@@ -265,7 +265,7 @@ CREATE TABLE bookings (
 );
 
 -- ============================================================
--- 9. COUNTERS
+-- 10. COUNTERS
 -- ============================================================
 
 CREATE TABLE counters (
@@ -290,7 +290,7 @@ CREATE TABLE counters (
 );
 
 -- ============================================================
--- 10. STAFF SHIFTS
+-- 11. STAFF SHIFTS
 -- ============================================================
 
 CREATE TABLE staff_shifts (
@@ -318,7 +318,7 @@ CREATE TABLE staff_shifts (
 );
 
 -- ============================================================
--- 11. COUNTER ASSIGNMENTS
+-- 12. COUNTER ASSIGNMENTS
 -- ============================================================
 
 CREATE TABLE counter_assignments (
@@ -348,7 +348,7 @@ CREATE TABLE counter_assignments (
 );
 
 -- ============================================================
--- 12. QUEUE TICKETS
+-- 13. QUEUE TICKETS
 -- ============================================================
 
 CREATE TABLE queue_tickets (
@@ -411,7 +411,7 @@ CREATE TABLE queue_tickets (
 );
 
 -- ============================================================
--- 13. QUEUE EVENTS
+-- 14. QUEUE EVENTS
 -- ============================================================
 
 CREATE TABLE queue_events (
@@ -438,7 +438,7 @@ CREATE TABLE queue_events (
 );
 
 -- ============================================================
--- 14. NO-SHOW PREDICTIONS
+-- 15. NO-SHOW PREDICTIONS
 -- ============================================================
 
 CREATE TABLE no_show_predictions (
@@ -461,7 +461,7 @@ CREATE TABLE no_show_predictions (
 );
 
 -- ============================================================
--- 15. NOTIFICATIONS
+-- 16. NOTIFICATIONS
 -- ============================================================
 
 CREATE TABLE notifications (
@@ -500,7 +500,7 @@ CREATE TABLE notifications (
 );
 
 -- ============================================================
--- 16. QUEUE PREDICTIONS
+-- 17. QUEUE PREDICTIONS
 -- ============================================================
 
 CREATE TABLE queue_predictions (
@@ -530,7 +530,7 @@ CREATE TABLE queue_predictions (
 );
 
 -- ============================================================
--- 17. PREDICTION LOGS
+-- 18. PREDICTION LOGS
 -- ============================================================
 
 CREATE TABLE prediction_logs (
@@ -557,7 +557,7 @@ CREATE TABLE prediction_logs (
 );
 
 -- ============================================================
--- 18. CUSTOMER FEEDBACKS
+-- 19. CUSTOMER FEEDBACKS
 -- ============================================================
 
 CREATE TABLE customer_feedbacks (
@@ -597,7 +597,7 @@ CREATE TABLE customer_feedbacks (
 );
 
 -- ============================================================
--- 19. AUDIT LOGS
+-- 20. AUDIT LOGS
 -- ============================================================
 
 CREATE TABLE audit_logs (
@@ -620,7 +620,7 @@ CREATE TABLE audit_logs (
 );
 
 -- ============================================================
--- 20. INDEXES
+-- 21. INDEXES
 -- ============================================================
 
 -- USERS
@@ -911,6 +911,10 @@ CHECK (
   OR revoked_reason IN ('LOGOUT', 'LOGOUT_ALL', 'ROTATED', 'REUSE_DETECTED', 'EXPIRED')
 );
 
+ALTER TABLE refresh_tokens
+ADD CONSTRAINT chk_refresh_token_expiry
+CHECK (expires_at > created_at);
+
 ALTER TABLE branches
 ADD CONSTRAINT chk_branches_deleted_at
 CHECK (
@@ -926,6 +930,22 @@ CHECK (
   OR
   (is_deleted = TRUE AND deleted_at IS NOT NULL)
 );
+
+ALTER TABLE branch_schedules
+    ADD CONSTRAINT chk_branch_schedule_day_of_week
+        CHECK (day_of_week BETWEEN 1 AND 7);
+
+ALTER TABLE staff_shifts
+ADD CONSTRAINT chk_staff_shift_status
+CHECK (status IN ('SCHEDULED', 'ACTIVE', 'COMPLETED', 'CANCELLED'));
+
+ALTER TABLE no_show_predictions
+ADD CONSTRAINT chk_no_show_risk_level
+CHECK (risk_level IN ('LOW', 'MEDIUM', 'HIGH'));
+
+ALTER TABLE no_show_predictions
+ADD CONSTRAINT chk_no_show_probability
+CHECK (probability >= 0 AND probability <= 100);
 
 -- Walk-in / customer ownership.
 ALTER TABLE queue_tickets
@@ -959,6 +979,14 @@ CHECK (
 ALTER TABLE service_capacity_slots
 ADD CONSTRAINT chk_capacity_slots_time_range
 CHECK (start_time < end_time);
+
+ALTER TABLE service_capacity_slots
+ADD CONSTRAINT chk_capacity_slots_max_bookings
+CHECK (max_bookings > 0);
+
+ALTER TABLE service_capacity_slots
+ADD CONSTRAINT chk_capacity_slots_max_queue_tickets
+CHECK (max_queue_tickets IS NULL OR max_queue_tickets > 0);
 
 -- Queue ticket time order.
 ALTER TABLE queue_tickets
