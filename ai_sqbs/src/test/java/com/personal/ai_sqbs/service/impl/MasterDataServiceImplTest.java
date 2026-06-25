@@ -168,7 +168,6 @@ class MasterDataServiceImplTest {
 
         assertThrows(AppException.class, () -> service.createCounter(1L, CounterRequest.builder()
                 .name("Counter 1")
-                .isActive(true)
                 .build()));
 
         verify(counterRepository, never()).save(any());

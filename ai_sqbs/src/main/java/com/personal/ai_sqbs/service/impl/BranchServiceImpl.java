@@ -1,7 +1,6 @@
 package com.personal.ai_sqbs.service.impl;
 
 import com.personal.ai_sqbs.dto.branch.request.BranchCreateRequest;
-import com.personal.ai_sqbs.dto.branch.request.BranchStatusUpdateRequest;
 import com.personal.ai_sqbs.dto.branch.request.BranchUpdateRequest;
 import com.personal.ai_sqbs.dto.branch.response.BranchResponse;
 import com.personal.ai_sqbs.entity.Branch;
@@ -75,15 +74,19 @@ public class BranchServiceImpl implements BranchService {
 
     @Override
     @Transactional
-    public BranchResponse updateBranchStatus(Long branchId, BranchStatusUpdateRequest request) {
-        Branch branch = branchRepository.findById(branchId)
-                .orElseThrow(() -> new AppException(ErrorCode.BRANCH_NOT_FOUND));
+    public BranchResponse activateBranch(Long branchId) {
+        return updateBranchActiveStatus(branchId, true);
+    }
 
-        if (Boolean.TRUE.equals(branch.getIsDeleted())) {
-            throw new AppException(ErrorCode.BRANCH_ALREADY_DELETED);
-        }
+    @Override
+    @Transactional
+    public BranchResponse deactivateBranch(Long branchId) {
+        return updateBranchActiveStatus(branchId, false);
+    }
 
-        branch.setIsActive(request.getIsActive());
+    private BranchResponse updateBranchActiveStatus(Long branchId, boolean active) {
+        Branch branch = getExistingBranch(branchId);
+        branch.setIsActive(active);
         return branchMapper.toResponse(branch);
     }
 

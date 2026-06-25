@@ -14,14 +14,13 @@ public class CounterMapper {
                 .branch(branch)
                 .name(request.getName().trim())
                 .description(normalizeDescription(request.getDescription()))
-                .isActive(request.getIsActive() == null || request.getIsActive())
+                .isActive(true)
                 .build();
     }
 
     public void updateEntity(Counter counter, CounterRequest request) {
         counter.setName(request.getName().trim());
         counter.setDescription(normalizeDescription(request.getDescription()));
-        counter.setIsActive(request.getIsActive() == null || request.getIsActive());
     }
 
     public CounterResponse toResponse(Counter counter) {

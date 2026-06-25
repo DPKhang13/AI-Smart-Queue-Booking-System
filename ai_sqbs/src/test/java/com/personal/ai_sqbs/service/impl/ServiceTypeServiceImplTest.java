@@ -1,7 +1,6 @@
 package com.personal.ai_sqbs.service.impl;
 
 import com.personal.ai_sqbs.dto.servicetype.request.ServiceTypeCreateRequest;
-import com.personal.ai_sqbs.dto.servicetype.request.ServiceTypeStatusUpdateRequest;
 import com.personal.ai_sqbs.entity.Branch;
 import com.personal.ai_sqbs.entity.ServiceType;
 import com.personal.ai_sqbs.exception.AppException;
@@ -103,16 +102,22 @@ class ServiceTypeServiceImplTest {
     }
 
     @Test
-    void updateStatusRejectsDeletedServiceType() {
+    void activateRejectsDeletedServiceType() {
         ServiceType serviceType = serviceType(true, true);
         when(serviceTypeRepository.findById(10L)).thenReturn(Optional.of(serviceType));
 
-        assertThrows(AppException.class, () ->
-                serviceTypeService.updateServiceTypeStatus(
-                        10L,
-                        ServiceTypeStatusUpdateRequest.builder().isActive(true).build()
-                )
-        );
+        assertThrows(AppException.class, () -> serviceTypeService.activateServiceType(10L));
+    }
+
+    @Test
+    void deactivateServiceTypeSetsInactive() {
+        ServiceType serviceType = serviceType(true, false);
+        when(serviceTypeRepository.findById(10L)).thenReturn(Optional.of(serviceType));
+
+        var response = serviceTypeService.deactivateServiceType(10L);
+
+        assertFalse(response.getIsActive());
+        assertFalse(serviceType.getIsActive());
     }
 
     @Test

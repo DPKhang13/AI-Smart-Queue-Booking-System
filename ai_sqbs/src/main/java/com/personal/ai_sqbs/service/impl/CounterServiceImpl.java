@@ -1,7 +1,6 @@
 package com.personal.ai_sqbs.service.impl;
 
 import com.personal.ai_sqbs.dto.counter.request.CounterRequest;
-import com.personal.ai_sqbs.dto.counter.request.CounterStatusUpdateRequest;
 import com.personal.ai_sqbs.dto.counter.response.CounterResponse;
 import com.personal.ai_sqbs.entity.Branch;
 import com.personal.ai_sqbs.entity.Counter;
@@ -63,9 +62,19 @@ public class CounterServiceImpl implements CounterService {
 
     @Override
     @Transactional
-    public CounterResponse updateCounterStatus(Long counterId, CounterStatusUpdateRequest request) {
+    public CounterResponse activateCounter(Long counterId) {
+        return updateCounterActiveStatus(counterId, true);
+    }
+
+    @Override
+    @Transactional
+    public CounterResponse deactivateCounter(Long counterId) {
+        return updateCounterActiveStatus(counterId, false);
+    }
+
+    private CounterResponse updateCounterActiveStatus(Long counterId, boolean active) {
         Counter counter = getExistingCounter(counterId);
-        counter.setIsActive(request.getIsActive());
+        counter.setIsActive(active);
         return counterMapper.toResponse(counter);
     }
 
