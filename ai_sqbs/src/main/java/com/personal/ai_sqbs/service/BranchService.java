@@ -1,7 +1,6 @@
 package com.personal.ai_sqbs.service;
 
 import com.personal.ai_sqbs.dto.branch.request.BranchCreateRequest;
-import com.personal.ai_sqbs.dto.branch.request.BranchStatusUpdateRequest;
 import com.personal.ai_sqbs.dto.branch.request.BranchUpdateRequest;
 import com.personal.ai_sqbs.dto.branch.response.BranchResponse;
 
@@ -19,5 +18,7 @@ public interface BranchService {
 
     void deleteBranch(Long branchId);
 
-    BranchResponse updateBranchStatus(Long branchId, BranchStatusUpdateRequest request);
+    BranchResponse activateBranch(Long branchId);
+
+    BranchResponse deactivateBranch(Long branchId);
 }

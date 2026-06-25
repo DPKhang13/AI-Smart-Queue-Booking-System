@@ -1,7 +1,6 @@
 package com.personal.ai_sqbs.service.impl;
 
 import com.personal.ai_sqbs.dto.branch.request.BranchCreateRequest;
-import com.personal.ai_sqbs.dto.branch.request.BranchStatusUpdateRequest;
 import com.personal.ai_sqbs.entity.Branch;
 import com.personal.ai_sqbs.exception.AppException;
 import com.personal.ai_sqbs.mapper.BranchMapper;
@@ -78,14 +77,23 @@ class BranchServiceImplTest {
     }
 
     @Test
-    void updateStatusRejectsDeletedBranch() {
+    void activateRejectsDeletedBranch() {
         Branch branch = branch();
         branch.setIsDeleted(true);
         when(branchRepository.findById(1L)).thenReturn(Optional.of(branch));
 
-        assertThrows(AppException.class, () ->
-                branchService.updateBranchStatus(1L, BranchStatusUpdateRequest.builder().isActive(true).build())
-        );
+        assertThrows(AppException.class, () -> branchService.activateBranch(1L));
+    }
+
+    @Test
+    void deactivateBranchSetsInactive() {
+        Branch branch = branch();
+        when(branchRepository.findById(1L)).thenReturn(Optional.of(branch));
+
+        var response = branchService.deactivateBranch(1L);
+
+        assertFalse(response.getIsActive());
+        assertFalse(branch.getIsActive());
     }
 
     @Test

@@ -25,7 +25,7 @@ public class ServiceCapacitySlotMapper {
                 .endTime(request.getEndTime())
                 .maxBookings(request.getMaxBookings())
                 .maxQueueTickets(request.getMaxQueueTickets())
-                .isActive(request.getIsActive() == null || request.getIsActive())
+                .isActive(true)
                 .build();
     }
 
@@ -43,7 +43,6 @@ public class ServiceCapacitySlotMapper {
         capacitySlot.setEndTime(request.getEndTime());
         capacitySlot.setMaxBookings(request.getMaxBookings());
         capacitySlot.setMaxQueueTickets(request.getMaxQueueTickets());
-        capacitySlot.setIsActive(request.getIsActive());
     }
 
     public ServiceCapacitySlotResponse toResponse(ServiceCapacitySlot capacitySlot) {

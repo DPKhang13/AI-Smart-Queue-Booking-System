@@ -1,7 +1,6 @@
 package com.personal.ai_sqbs.service.impl;
 
 import com.personal.ai_sqbs.dto.servicetype.request.ServiceTypeCreateRequest;
-import com.personal.ai_sqbs.dto.servicetype.request.ServiceTypeStatusUpdateRequest;
 import com.personal.ai_sqbs.dto.servicetype.request.ServiceTypeUpdateRequest;
 import com.personal.ai_sqbs.dto.servicetype.response.ServiceTypeResponse;
 import com.personal.ai_sqbs.entity.Branch;
@@ -80,18 +79,19 @@ public class ServiceTypeServiceImpl implements ServiceTypeService {
 
     @Override
     @Transactional
-    public ServiceTypeResponse updateServiceTypeStatus(
-            Long serviceTypeId,
-            ServiceTypeStatusUpdateRequest request
-    ) {
-        ServiceType serviceType = serviceTypeRepository.findById(serviceTypeId)
-                .orElseThrow(() -> new AppException(ErrorCode.SERVICE_TYPE_NOT_FOUND));
+    public ServiceTypeResponse activateServiceType(Long serviceTypeId) {
+        return updateServiceTypeActiveStatus(serviceTypeId, true);
+    }
 
-        if (Boolean.TRUE.equals(serviceType.getIsDeleted())) {
-            throw new AppException(ErrorCode.SERVICE_TYPE_ALREADY_DELETED);
-        }
+    @Override
+    @Transactional
+    public ServiceTypeResponse deactivateServiceType(Long serviceTypeId) {
+        return updateServiceTypeActiveStatus(serviceTypeId, false);
+    }
 
-        serviceType.setIsActive(request.getIsActive());
+    private ServiceTypeResponse updateServiceTypeActiveStatus(Long serviceTypeId, boolean active) {
+        ServiceType serviceType = getExistingServiceType(serviceTypeId);
+        serviceType.setIsActive(active);
         return serviceTypeMapper.toResponse(serviceType);
     }
 

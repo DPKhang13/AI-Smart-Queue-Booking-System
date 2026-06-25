@@ -47,6 +47,17 @@ public enum ErrorCode {
     //Counter
     COUNTER_NOT_FOUND(HttpStatus.NOT_FOUND, "Counter not found"),
     COUNTER_ALREADY_EXISTS(HttpStatus.CONFLICT, "Counter already exists in this branch"),
+    //Booking
+    BOOKING_NOT_FOUND(HttpStatus.NOT_FOUND, "Booking not found"),
+    BOOKING_ALREADY_EXISTS(HttpStatus.CONFLICT, "Booking already exists"),
+    BOOKING_SLOT_FULL(HttpStatus.CONFLICT, "Booking slot is full"),
+    BOOKING_TIME_INVALID(HttpStatus.BAD_REQUEST, "Booking time is invalid"),
+    BOOKING_DATE_INVALID(HttpStatus.BAD_REQUEST, "Booking date is invalid"),
+    BOOKING_STATUS_INVALID(HttpStatus.BAD_REQUEST, "Booking status is invalid"),
+    BOOKING_STATUS_TRANSITION_INVALID(HttpStatus.BAD_REQUEST, "Booking status transition is invalid"),
+    BOOKING_ACCESS_DENIED(HttpStatus.FORBIDDEN, "You do not have permission to access this booking"),
+    BRANCH_CLOSED(HttpStatus.BAD_REQUEST, "Branch is closed at the selected time"),
+    BRANCH_HOLIDAY_CLOSED(HttpStatus.BAD_REQUEST, "Branch is closed for the selected holiday"),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "Access denied"),
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "Validation error"),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");

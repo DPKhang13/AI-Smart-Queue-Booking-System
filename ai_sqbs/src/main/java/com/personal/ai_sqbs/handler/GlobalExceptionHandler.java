@@ -2,9 +2,12 @@ package com.personal.ai_sqbs.handler;
 
 import com.personal.ai_sqbs.dto.auth.response.ErrorResponse;
 import com.personal.ai_sqbs.exception.AppException;
+import com.personal.ai_sqbs.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -36,6 +39,24 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentials(HttpServletRequest request) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "Invalid email or password", request);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(HttpServletRequest request) {
+        return buildResponse(
+                ErrorCode.BOOKING_ALREADY_EXISTS.getStatus(),
+                ErrorCode.BOOKING_ALREADY_EXISTS.getDefaultMessage(),
+                request
+        );
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> handleOptimisticLock(HttpServletRequest request) {
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                "The booking was updated by another request. Please retry.",
+                request
+        );
     }
 
     @ExceptionHandler(Exception.class)

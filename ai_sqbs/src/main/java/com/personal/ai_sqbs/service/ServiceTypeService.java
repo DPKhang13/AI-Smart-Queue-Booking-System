@@ -1,7 +1,6 @@
 package com.personal.ai_sqbs.service;
 
 import com.personal.ai_sqbs.dto.servicetype.request.ServiceTypeCreateRequest;
-import com.personal.ai_sqbs.dto.servicetype.request.ServiceTypeStatusUpdateRequest;
 import com.personal.ai_sqbs.dto.servicetype.request.ServiceTypeUpdateRequest;
 import com.personal.ai_sqbs.dto.servicetype.response.ServiceTypeResponse;
 
@@ -19,5 +18,7 @@ public interface ServiceTypeService {
 
     void deleteServiceType(Long serviceTypeId);
 
-    ServiceTypeResponse updateServiceTypeStatus(Long serviceTypeId, ServiceTypeStatusUpdateRequest request);
+    ServiceTypeResponse activateServiceType(Long serviceTypeId);
+
+    ServiceTypeResponse deactivateServiceType(Long serviceTypeId);
 }

@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -54,11 +55,13 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MessageResponse> logout(HttpServletRequest request, HttpServletResponse response) {
         return ResponseEntity.ok(authService.logout(request, response));
     }
 
     @PostMapping("/logout-all")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MessageResponse> logoutAll(HttpServletRequest request, HttpServletResponse response) {
         return ResponseEntity.ok(authService.logoutAll(request, response));
     }

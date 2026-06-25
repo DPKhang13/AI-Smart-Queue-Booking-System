@@ -1,7 +1,6 @@
 package com.personal.ai_sqbs.service.impl;
 
 import com.personal.ai_sqbs.dto.capacityslot.request.ServiceCapacitySlotCreateRequest;
-import com.personal.ai_sqbs.dto.capacityslot.request.ServiceCapacitySlotStatusUpdateRequest;
 import com.personal.ai_sqbs.dto.capacityslot.request.ServiceCapacitySlotUpdateRequest;
 import com.personal.ai_sqbs.dto.capacityslot.response.ServiceCapacitySlotResponse;
 import com.personal.ai_sqbs.entity.Branch;
@@ -89,12 +88,19 @@ public class ServiceCapacitySlotServiceImpl implements ServiceCapacitySlotServic
 
     @Override
     @Transactional
-    public ServiceCapacitySlotResponse updateCapacitySlotStatus(
-            Long capacitySlotId,
-            ServiceCapacitySlotStatusUpdateRequest request
-    ) {
+    public ServiceCapacitySlotResponse activateCapacitySlot(Long capacitySlotId) {
+        return updateCapacitySlotActiveStatus(capacitySlotId, true);
+    }
+
+    @Override
+    @Transactional
+    public ServiceCapacitySlotResponse deactivateCapacitySlot(Long capacitySlotId) {
+        return updateCapacitySlotActiveStatus(capacitySlotId, false);
+    }
+
+    private ServiceCapacitySlotResponse updateCapacitySlotActiveStatus(Long capacitySlotId, boolean active) {
         ServiceCapacitySlot capacitySlot = getExistingCapacitySlot(capacitySlotId);
-        capacitySlot.setIsActive(request.getIsActive());
+        capacitySlot.setIsActive(active);
         return serviceCapacitySlotMapper.toResponse(capacitySlot);
     }
 

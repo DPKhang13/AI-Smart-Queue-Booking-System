@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class BranchServiceTypeController {
     private final ServiceTypeService serviceTypeService;
 
     @PostMapping("/create/{branchId}/service-types")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ServiceTypeResponse> createServiceType(
             @PathVariable Long branchId,
             @Valid @RequestBody ServiceTypeCreateRequest request
@@ -28,6 +30,7 @@ public class BranchServiceTypeController {
     }
 
     @GetMapping("/getById/{branchId}/service-types")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ServiceTypeResponse>> getServiceTypesByBranch(
             @PathVariable Long branchId
     ) {

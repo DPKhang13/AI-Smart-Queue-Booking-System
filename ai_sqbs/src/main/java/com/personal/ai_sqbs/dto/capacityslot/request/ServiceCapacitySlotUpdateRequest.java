@@ -42,7 +42,4 @@ public class ServiceCapacitySlotUpdateRequest {
 
     @PositiveOrZero(message = "Max queue tickets must be zero or greater")
     private Integer maxQueueTickets;
-
-    @NotNull(message = "Active status is required")
-    private Boolean isActive;
 }
