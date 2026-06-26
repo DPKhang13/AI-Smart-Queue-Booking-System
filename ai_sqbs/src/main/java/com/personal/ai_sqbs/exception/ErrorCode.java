@@ -47,6 +47,8 @@ public enum ErrorCode {
     //Counter
     COUNTER_NOT_FOUND(HttpStatus.NOT_FOUND, "Counter not found"),
     COUNTER_ALREADY_EXISTS(HttpStatus.CONFLICT, "Counter already exists in this branch"),
+    COUNTER_INACTIVE(HttpStatus.BAD_REQUEST, "Counter is inactive"),
+    COUNTER_NOT_BELONG_TO_BRANCH(HttpStatus.BAD_REQUEST, "Counter does not belong to selected branch"),
     //Booking
     BOOKING_NOT_FOUND(HttpStatus.NOT_FOUND, "Booking not found"),
     BOOKING_ALREADY_EXISTS(HttpStatus.CONFLICT, "Booking already exists"),
@@ -58,6 +60,18 @@ public enum ErrorCode {
     BOOKING_ACCESS_DENIED(HttpStatus.FORBIDDEN, "You do not have permission to access this booking"),
     BRANCH_CLOSED(HttpStatus.BAD_REQUEST, "Branch is closed at the selected time"),
     BRANCH_HOLIDAY_CLOSED(HttpStatus.BAD_REQUEST, "Branch is closed for the selected holiday"),
+    //Queue
+    QUEUE_TICKET_NOT_FOUND(HttpStatus.NOT_FOUND, "Queue ticket not found"),
+    QUEUE_TICKET_ALREADY_EXISTS_FOR_BOOKING(HttpStatus.CONFLICT, "Queue ticket already exists for this booking"),
+    QUEUE_TICKET_ACCESS_DENIED(HttpStatus.FORBIDDEN, "You do not have permission to access this queue ticket"),
+    QUEUE_TICKET_STATUS_INVALID(HttpStatus.BAD_REQUEST, "Queue ticket status is invalid"),
+    QUEUE_TICKET_TRANSITION_INVALID(HttpStatus.BAD_REQUEST, "Queue ticket status transition is invalid"),
+    QUEUE_TICKET_TERMINAL_STATUS(HttpStatus.BAD_REQUEST, "Queue ticket is already in terminal status"),
+    QUEUE_TICKET_GUEST_INFO_REQUIRED(HttpStatus.BAD_REQUEST, "Guest name or guest phone is required"),
+    QUEUE_EVENT_NOT_FOUND(HttpStatus.NOT_FOUND, "Queue event not found"),
+    STAFF_NOT_FOUND(HttpStatus.NOT_FOUND, "Staff not found"),
+    STAFF_ROLE_REQUIRED(HttpStatus.BAD_REQUEST, "Assigned user must have STAFF role"),
+    TICKET_NUMBER_GENERATION_FAILED(HttpStatus.CONFLICT, "Unable to generate unique ticket number"),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "Access denied"),
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "Validation error"),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");

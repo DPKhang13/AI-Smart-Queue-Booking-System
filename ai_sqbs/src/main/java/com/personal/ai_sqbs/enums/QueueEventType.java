@@ -7,5 +7,6 @@ public enum QueueEventType {
     TICKET_CANCELLED,
     TICKET_SKIPPED,
     STAFF_ASSIGNED,
+    COUNTER_ASSIGNED,
     TICKET_UPDATED
 }
