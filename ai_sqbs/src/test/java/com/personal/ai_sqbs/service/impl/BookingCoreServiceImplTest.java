@@ -19,6 +19,7 @@ import com.personal.ai_sqbs.repository.ServiceCapacitySlotRepository;
 import com.personal.ai_sqbs.repository.ServiceTypeRepository;
 import com.personal.ai_sqbs.repository.UserRepository;
 import com.personal.ai_sqbs.security.UserPrincipal;
+import com.personal.ai_sqbs.validation.BookingValidation;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -38,7 +39,7 @@ class BookingCoreServiceImplTest {
         Branch branch = branch(true);
         ServiceType serviceType = serviceType(branch, true);
         BookingRepository bookingRepository = mock(BookingRepository.class);
-        BookingValidationServiceImpl validationService = validationService(
+        BookingValidation validationService = validationService(
                 branch,
                 serviceType,
                 bookingRepository,
@@ -70,7 +71,7 @@ class BookingCoreServiceImplTest {
     void createBookingRejectsPastDate() {
         User user = user(1L, RoleConstants.USER);
         BookingRepository bookingRepository = mock(BookingRepository.class);
-        BookingValidationServiceImpl validationService = validationService(
+        BookingValidation validationService = validationService(
                 branch(true),
                 serviceType(branch(true), true),
                 bookingRepository,
@@ -96,7 +97,7 @@ class BookingCoreServiceImplTest {
                 any(),
                 anyCollection()
         )).thenReturn(true);
-        BookingValidationServiceImpl validationService = validationService(
+        BookingValidation validationService = validationService(
                 branch,
                 serviceType,
                 bookingRepository,
@@ -113,10 +114,16 @@ class BookingCoreServiceImplTest {
         Booking booking = booking(owner, BookingStatus.CONFIRMED);
         BookingRepository bookingRepository = mock(BookingRepository.class);
         UserRepository userRepository = mock(UserRepository.class);
+        BookingValidation validationService = validationService(
+                branch(true),
+                serviceType(branch(true), true),
+                bookingRepository,
+                emptyCapacityRepository()
+        );
         BookingServiceImpl service = new BookingServiceImpl(
                 userRepository,
                 bookingRepository,
-                mock(com.personal.ai_sqbs.service.BookingValidationService.class),
+                validationService,
                 new BookingMapper()
         );
         when(bookingRepository.findById(10L)).thenReturn(Optional.of(booking));
@@ -130,7 +137,7 @@ class BookingCoreServiceImplTest {
         Booking booking = booking(user, BookingStatus.COMPLETED);
         BookingRepository bookingRepository = mock(BookingRepository.class);
         UserRepository userRepository = mock(UserRepository.class);
-        BookingValidationServiceImpl validationService = validationService(
+        BookingValidation validationService = validationService(
                 branch(true),
                 serviceType(branch(true), true),
                 bookingRepository,
@@ -151,7 +158,7 @@ class BookingCoreServiceImplTest {
         ));
     }
 
-    private BookingValidationServiceImpl validationService(
+    private BookingValidation validationService(
             Branch branch,
             ServiceType serviceType,
             BookingRepository bookingRepository,
@@ -166,7 +173,7 @@ class BookingCoreServiceImplTest {
         when(scheduleRepository.findByBranchBranchIdAndDayOfWeek(anyLong(), anyInt())).thenReturn(Optional.empty());
         when(holidayRepository.findByBranchBranchIdAndHolidayDate(anyLong(), any())).thenReturn(Optional.empty());
 
-        return new BookingValidationServiceImpl(
+        return new BookingValidation(
                 branchRepository,
                 serviceTypeRepository,
                 scheduleRepository,

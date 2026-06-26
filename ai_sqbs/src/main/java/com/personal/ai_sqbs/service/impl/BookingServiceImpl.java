@@ -1,6 +1,5 @@
 package com.personal.ai_sqbs.service.impl;
 
-import com.personal.ai_sqbs.constant.RoleConstants;
 import com.personal.ai_sqbs.dto.booking.request.BookingCancelRequest;
 import com.personal.ai_sqbs.dto.booking.request.BookingCreateRequest;
 import com.personal.ai_sqbs.dto.booking.response.BookingResponse;
@@ -17,7 +16,7 @@ import com.personal.ai_sqbs.repository.BookingRepository;
 import com.personal.ai_sqbs.repository.UserRepository;
 import com.personal.ai_sqbs.security.UserPrincipal;
 import com.personal.ai_sqbs.service.BookingService;
-import com.personal.ai_sqbs.service.BookingValidationService;
+import com.personal.ai_sqbs.validation.BookingValidation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -38,15 +37,15 @@ public class BookingServiceImpl implements BookingService {
 
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
-    private final BookingValidationService bookingValidationService;
+    private final BookingValidation bookingValidation;
     private final BookingMapper bookingMapper;
 
     @Override
     @Transactional
     public BookingResponse createBooking(BookingCreateRequest request, UserPrincipal currentUser) {
         User user = getCurrentUser(currentUser);
-        BookingValidationService.BookingValidationResult validationResult =
-                bookingValidationService.validateCreateBooking(request, user);
+        BookingValidation.BookingValidationResult validationResult =
+                bookingValidation.validateCreateBooking(request, user);
         Branch branch = validationResult.branch();
         ServiceType serviceType = validationResult.serviceType();
 
@@ -79,8 +78,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public BookingResponse getBookingById(Long bookingId, UserPrincipal currentUser) {
-        Booking booking = getExistingBooking(bookingId);
-        validateCanViewBooking(booking, currentUser);
+        Booking booking = bookingValidation.getExistingBooking(bookingId);
+        bookingValidation.validateCanViewBooking(booking, currentUser);
         return bookingMapper.toResponse(booking);
     }
 
@@ -91,9 +90,9 @@ public class BookingServiceImpl implements BookingService {
             BookingCancelRequest request,
             UserPrincipal currentUser
     ) {
-        Booking booking = getExistingBooking(bookingId);
-        validateCanCancelBooking(booking, currentUser);
-        bookingValidationService.validateStatusTransition(booking, BookingStatus.CANCELLED);
+        Booking booking = bookingValidation.getExistingBooking(bookingId);
+        bookingValidation.validateCanCancelBooking(booking, currentUser);
+        bookingValidation.validateStatusTransition(booking, BookingStatus.CANCELLED);
 
         booking.setStatus(BookingStatus.CANCELLED);
         booking.setCancelledAt(OffsetDateTime.now());
@@ -104,9 +103,9 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponse confirmBooking(Long bookingId, UserPrincipal currentUser) {
-        validateAdmin(currentUser);
-        Booking booking = getExistingBooking(bookingId);
-        bookingValidationService.validateStatusTransition(booking, BookingStatus.CONFIRMED);
+        bookingValidation.validateAdmin(currentUser);
+        Booking booking = bookingValidation.getExistingBooking(bookingId);
+        bookingValidation.validateStatusTransition(booking, BookingStatus.CONFIRMED);
 
         booking.setStatus(BookingStatus.CONFIRMED);
         return bookingMapper.toResponse(booking);
@@ -115,9 +114,9 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponse completeBooking(Long bookingId, UserPrincipal currentUser) {
-        validateAdmin(currentUser);
-        Booking booking = getExistingBooking(bookingId);
-        bookingValidationService.validateStatusTransition(booking, BookingStatus.COMPLETED);
+        bookingValidation.validateAdmin(currentUser);
+        Booking booking = bookingValidation.getExistingBooking(bookingId);
+        bookingValidation.validateStatusTransition(booking, BookingStatus.COMPLETED);
 
         booking.setStatus(BookingStatus.COMPLETED);
         return bookingMapper.toResponse(booking);
@@ -126,9 +125,9 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponse markNoShow(Long bookingId, UserPrincipal currentUser) {
-        validateAdmin(currentUser);
-        Booking booking = getExistingBooking(bookingId);
-        bookingValidationService.validateStatusTransition(booking, BookingStatus.NO_SHOW);
+        bookingValidation.validateAdmin(currentUser);
+        Booking booking = bookingValidation.getExistingBooking(bookingId);
+        bookingValidation.validateStatusTransition(booking, BookingStatus.NO_SHOW);
 
         booking.setStatus(BookingStatus.NO_SHOW);
         return bookingMapper.toResponse(booking);
@@ -137,42 +136,6 @@ public class BookingServiceImpl implements BookingService {
     private User getCurrentUser(UserPrincipal currentUser) {
         return userRepository.findWithRoleByUserId(currentUser.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-    }
-
-    private Booking getExistingBooking(Long bookingId) {
-        return bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
-    }
-
-    private void validateCanViewBooking(Booking booking, UserPrincipal currentUser) {
-        if (isAdmin(currentUser)) {
-            return;
-        }
-
-        // TODO: Add STAFF branch-level access when staff-branch assignment is implemented.
-        if (!booking.getUser().getUserId().equals(currentUser.getUserId())) {
-            throw new AppException(ErrorCode.BOOKING_ACCESS_DENIED);
-        }
-    }
-
-    private void validateCanCancelBooking(Booking booking, UserPrincipal currentUser) {
-        if (isAdmin(currentUser)) {
-            return;
-        }
-
-        if (!booking.getUser().getUserId().equals(currentUser.getUserId())) {
-            throw new AppException(ErrorCode.BOOKING_ACCESS_DENIED);
-        }
-    }
-
-    private void validateAdmin(UserPrincipal currentUser) {
-        if (!isAdmin(currentUser)) {
-            throw new AppException(ErrorCode.BOOKING_ACCESS_DENIED);
-        }
-    }
-
-    private boolean isAdmin(UserPrincipal currentUser) {
-        return RoleConstants.ADMIN.equals(currentUser.getRole());
     }
 
     private String generateBookingCode(BookingCreateRequest request) {

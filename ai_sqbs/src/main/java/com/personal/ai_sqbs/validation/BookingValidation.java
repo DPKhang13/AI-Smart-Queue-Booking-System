@@ -1,5 +1,6 @@
-package com.personal.ai_sqbs.service.impl;
+package com.personal.ai_sqbs.validation;
 
+import com.personal.ai_sqbs.constant.RoleConstants;
 import com.personal.ai_sqbs.dto.booking.request.BookingCreateRequest;
 import com.personal.ai_sqbs.entity.Booking;
 import com.personal.ai_sqbs.entity.Branch;
@@ -17,17 +18,17 @@ import com.personal.ai_sqbs.repository.BranchRepository;
 import com.personal.ai_sqbs.repository.BranchScheduleRepository;
 import com.personal.ai_sqbs.repository.ServiceCapacitySlotRepository;
 import com.personal.ai_sqbs.repository.ServiceTypeRepository;
-import com.personal.ai_sqbs.service.BookingValidationService;
+import com.personal.ai_sqbs.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-@Service
+@Component
 @RequiredArgsConstructor
-public class BookingValidationServiceImpl implements BookingValidationService {
+public class BookingValidation {
 
     private static final List<BookingStatus> ACTIVE_STATUSES = List.of(
             BookingStatus.PENDING,
@@ -41,7 +42,6 @@ public class BookingValidationServiceImpl implements BookingValidationService {
     private final ServiceCapacitySlotRepository serviceCapacitySlotRepository;
     private final BookingRepository bookingRepository;
 
-    @Override
     public BookingValidationResult validateCreateBooking(BookingCreateRequest request, User user) {
         validateUser(user);
         Branch branch = getActiveBranch(request.getBranchId());
@@ -55,7 +55,38 @@ public class BookingValidationServiceImpl implements BookingValidationService {
         return new BookingValidationResult(branch, serviceType);
     }
 
-    @Override
+    public Booking getExistingBooking(Long bookingId) {
+        return bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+    }
+
+    public void validateCanViewBooking(Booking booking, UserPrincipal currentUser) {
+        if (isAdmin(currentUser)) {
+            return;
+        }
+
+        // TODO: Add STAFF branch-level access when staff-branch assignment is implemented.
+        if (!booking.getUser().getUserId().equals(currentUser.getUserId())) {
+            throw new AppException(ErrorCode.BOOKING_ACCESS_DENIED);
+        }
+    }
+
+    public void validateCanCancelBooking(Booking booking, UserPrincipal currentUser) {
+        if (isAdmin(currentUser)) {
+            return;
+        }
+
+        if (!booking.getUser().getUserId().equals(currentUser.getUserId())) {
+            throw new AppException(ErrorCode.BOOKING_ACCESS_DENIED);
+        }
+    }
+
+    public void validateAdmin(UserPrincipal currentUser) {
+        if (!isAdmin(currentUser)) {
+            throw new AppException(ErrorCode.BOOKING_ACCESS_DENIED);
+        }
+    }
+
     public void validateStatusTransition(Booking booking, BookingStatus targetStatus) {
         BookingStatus currentStatus = booking.getStatus();
 
@@ -256,5 +287,12 @@ public class BookingValidationServiceImpl implements BookingValidationService {
         return status == BookingStatus.CANCELLED
                 || status == BookingStatus.COMPLETED
                 || status == BookingStatus.NO_SHOW;
+    }
+
+    private boolean isAdmin(UserPrincipal currentUser) {
+        return RoleConstants.ADMIN.equals(currentUser.getRole());
+    }
+
+    public record BookingValidationResult(Branch branch, ServiceType serviceType) {
     }
 }

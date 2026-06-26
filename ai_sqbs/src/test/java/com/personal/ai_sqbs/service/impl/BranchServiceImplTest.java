@@ -5,6 +5,7 @@ import com.personal.ai_sqbs.entity.Branch;
 import com.personal.ai_sqbs.exception.AppException;
 import com.personal.ai_sqbs.mapper.BranchMapper;
 import com.personal.ai_sqbs.repository.BranchRepository;
+import com.personal.ai_sqbs.validation.BranchValidation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,11 @@ class BranchServiceImplTest {
     @BeforeEach
     void setUp() {
         branchRepository = mock(BranchRepository.class);
-        branchService = new BranchServiceImpl(branchRepository, new BranchMapper());
+        branchService = new BranchServiceImpl(
+                branchRepository,
+                new BranchMapper(),
+                new BranchValidation(branchRepository)
+        );
     }
 
     @AfterEach

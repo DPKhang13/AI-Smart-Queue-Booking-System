@@ -7,6 +7,7 @@ import com.personal.ai_sqbs.exception.AppException;
 import com.personal.ai_sqbs.mapper.ServiceTypeMapper;
 import com.personal.ai_sqbs.repository.BranchRepository;
 import com.personal.ai_sqbs.repository.ServiceTypeRepository;
+import com.personal.ai_sqbs.validation.ServiceTypeValidation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,9 +32,9 @@ class ServiceTypeServiceImplTest {
         branchRepository = mock(BranchRepository.class);
         serviceTypeRepository = mock(ServiceTypeRepository.class);
         serviceTypeService = new ServiceTypeServiceImpl(
-                branchRepository,
                 serviceTypeRepository,
-                new ServiceTypeMapper()
+                new ServiceTypeMapper(),
+                new ServiceTypeValidation(branchRepository, serviceTypeRepository)
         );
     }
 
