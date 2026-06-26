@@ -51,10 +51,15 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public MessageResponse register(RegisterRequest request) {
         String email = request.getEmail().trim().toLowerCase();
+        String username = normalizeUsername(request.getUsername());
         String phone = normalizePhone(request.getPhone());
 
         if (userRepository.existsByEmail(email)) {
             throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
+        }
+
+        if (username != null && userRepository.existsByUsernameIgnoreCase(username)) {
+            throw new AppException(ErrorCode.USERNAME_ALREADY_EXISTS);
         }
 
         if (phone != null && userRepository.existsByPhone(phone)) {
@@ -68,6 +73,7 @@ public class AuthServiceImpl implements AuthService {
                 .role(role)
                 .fullName(request.getFullName().trim())
                 .email(email)
+                .username(username)
                 .phone(phone)
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .isActive(true)
@@ -86,8 +92,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponse login(LoginRequest request, HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
-        String email = request.getEmail().trim().toLowerCase();
-        userRepository.findByEmail(email)
+        String identifier = request.getUsernameOrEmail().trim().toLowerCase();
+        userRepository.findByEmailOrUsername(identifier)
                 .filter(user -> !Boolean.TRUE.equals(user.getEmailVerified()))
                 .ifPresent(user -> {
                     throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
@@ -96,7 +102,7 @@ public class AuthServiceImpl implements AuthService {
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(email, request.getPassword())
+                    new UsernamePasswordAuthenticationToken(identifier, request.getPassword())
             );
         } catch (RuntimeException exception) {
             throw new BadCredentialsException("Invalid email or password");
@@ -162,5 +168,13 @@ public class AuthServiceImpl implements AuthService {
         }
 
         return phone.trim();
+    }
+
+    private String normalizeUsername(String username) {
+        if (!StringUtils.hasText(username)) {
+            return null;
+        }
+
+        return username.trim().toLowerCase();
     }
 }

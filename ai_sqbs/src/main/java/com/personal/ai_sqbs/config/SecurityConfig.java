@@ -52,10 +52,6 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
                         .permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/logout", "/api/auth/logout-all").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
-                        // Future booking, queue, branch, prediction, and feedback modules should add
-                        // role rules here.
                         .requestMatchers("/api/admin/**").hasRole(RoleConstants.ADMIN)
                         .requestMatchers("/api/staff/**").hasAnyRole(RoleConstants.STAFF, RoleConstants.ADMIN)
                         .anyRequest().authenticated())

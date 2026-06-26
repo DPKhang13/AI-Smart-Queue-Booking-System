@@ -4,6 +4,7 @@ import com.personal.ai_sqbs.base.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -48,11 +49,11 @@ public class ServiceCapacitySlot extends BaseEntity {
     private LocalTime endTime;
 
     @NotNull
-    @Positive
+    @PositiveOrZero
     @Column(name = "max_bookings", nullable = false)
     private Integer maxBookings;
 
-    @Positive
+    @PositiveOrZero
     @Column(name = "max_queue_tickets")
     private Integer maxQueueTickets;
 
