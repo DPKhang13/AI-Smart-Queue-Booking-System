@@ -4,12 +4,10 @@ import com.personal.ai_sqbs.dto.counter.request.CounterRequest;
 import com.personal.ai_sqbs.dto.counter.response.CounterResponse;
 import com.personal.ai_sqbs.entity.Branch;
 import com.personal.ai_sqbs.entity.Counter;
-import com.personal.ai_sqbs.exception.AppException;
-import com.personal.ai_sqbs.exception.ErrorCode;
 import com.personal.ai_sqbs.mapper.CounterMapper;
-import com.personal.ai_sqbs.repository.BranchRepository;
 import com.personal.ai_sqbs.repository.CounterRepository;
 import com.personal.ai_sqbs.service.CounterService;
+import com.personal.ai_sqbs.validation.CounterValidation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,15 +18,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CounterServiceImpl implements CounterService {
 
-    private final BranchRepository branchRepository;
     private final CounterRepository counterRepository;
     private final CounterMapper counterMapper;
+    private final CounterValidation counterValidation;
 
     @Override
     @Transactional
     public CounterResponse createCounter(Long branchId, CounterRequest request) {
-        Branch branch = getActiveBranch(branchId);
-        validateUniqueCounterName(branchId, request.getName());
+        Branch branch = counterValidation.validateCreateRequest(branchId, request);
 
         Counter counter = counterMapper.toEntity(branch, request);
         return counterMapper.toResponse(counterRepository.save(counter));
@@ -37,7 +34,7 @@ public class CounterServiceImpl implements CounterService {
     @Override
     @Transactional(readOnly = true)
     public List<CounterResponse> getCountersByBranch(Long branchId) {
-        getExistingBranch(branchId);
+        counterValidation.getExistingBranch(branchId);
         return counterRepository.findByBranchBranchIdAndIsActiveTrue(branchId).stream()
                 .map(counterMapper::toResponse)
                 .toList();
@@ -46,16 +43,13 @@ public class CounterServiceImpl implements CounterService {
     @Override
     @Transactional(readOnly = true)
     public CounterResponse getCounter(Long counterId) {
-        return counterMapper.toResponse(getExistingCounter(counterId));
+        return counterMapper.toResponse(counterValidation.getExistingCounter(counterId));
     }
 
     @Override
     @Transactional
     public CounterResponse updateCounter(Long counterId, CounterRequest request) {
-        Counter counter = getExistingCounter(counterId);
-        Long branchId = counter.getBranch().getBranchId();
-        validateUniqueCounterNameForUpdate(branchId, request.getName(), counterId);
-
+        Counter counter = counterValidation.validateUpdateRequest(counterId, request);
         counterMapper.updateEntity(counter, request);
         return counterMapper.toResponse(counter);
     }
@@ -73,7 +67,7 @@ public class CounterServiceImpl implements CounterService {
     }
 
     private CounterResponse updateCounterActiveStatus(Long counterId, boolean active) {
-        Counter counter = getExistingCounter(counterId);
+        Counter counter = counterValidation.getExistingCounter(counterId);
         counter.setIsActive(active);
         return counterMapper.toResponse(counter);
     }
@@ -81,43 +75,7 @@ public class CounterServiceImpl implements CounterService {
     @Override
     @Transactional
     public void deleteCounter(Long counterId) {
-        Counter counter = getExistingCounter(counterId);
+        Counter counter = counterValidation.getExistingCounter(counterId);
         counter.setIsActive(false);
-    }
-
-    private Branch getExistingBranch(Long branchId) {
-        return branchRepository.findByBranchIdAndIsDeletedFalse(branchId)
-                .orElseThrow(() -> new AppException(ErrorCode.BRANCH_NOT_FOUND));
-    }
-
-    private Branch getActiveBranch(Long branchId) {
-        Branch branch = getExistingBranch(branchId);
-
-        if (!Boolean.TRUE.equals(branch.getIsActive())) {
-            throw new AppException(ErrorCode.BRANCH_INACTIVE);
-        }
-
-        return branch;
-    }
-
-    private Counter getExistingCounter(Long counterId) {
-        return counterRepository.findById(counterId)
-                .orElseThrow(() -> new AppException(ErrorCode.COUNTER_NOT_FOUND));
-    }
-
-    private void validateUniqueCounterName(Long branchId, String name) {
-        if (counterRepository.existsByBranchBranchIdAndNameIgnoreCase(branchId, name.trim())) {
-            throw new AppException(ErrorCode.COUNTER_ALREADY_EXISTS);
-        }
-    }
-
-    private void validateUniqueCounterNameForUpdate(Long branchId, String name, Long counterId) {
-        if (counterRepository.existsByBranchBranchIdAndNameIgnoreCaseAndCounterIdNot(
-                branchId,
-                name.trim(),
-                counterId
-        )) {
-            throw new AppException(ErrorCode.COUNTER_ALREADY_EXISTS);
-        }
     }
 }

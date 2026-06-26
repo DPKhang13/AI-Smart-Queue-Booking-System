@@ -21,6 +21,10 @@ import com.personal.ai_sqbs.repository.BranchScheduleRepository;
 import com.personal.ai_sqbs.repository.CounterRepository;
 import com.personal.ai_sqbs.repository.ServiceCapacitySlotRepository;
 import com.personal.ai_sqbs.repository.ServiceTypeRepository;
+import com.personal.ai_sqbs.validation.BranchHolidayValidation;
+import com.personal.ai_sqbs.validation.BranchScheduleValidation;
+import com.personal.ai_sqbs.validation.CounterValidation;
+import com.personal.ai_sqbs.validation.ServiceCapacitySlotValidation;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -38,9 +42,9 @@ class MasterDataServiceImplTest {
         BranchRepository branchRepository = mock(BranchRepository.class);
         BranchScheduleRepository scheduleRepository = mock(BranchScheduleRepository.class);
         BranchScheduleServiceImpl service = new BranchScheduleServiceImpl(
-                branchRepository,
                 scheduleRepository,
-                new BranchScheduleMapper()
+                new BranchScheduleMapper(),
+                new BranchScheduleValidation(branchRepository, scheduleRepository)
         );
         when(branchRepository.findByBranchIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(branch(true)));
         when(scheduleRepository.existsByBranchBranchIdAndDayOfWeek(1L, 1)).thenReturn(false);
@@ -66,9 +70,9 @@ class MasterDataServiceImplTest {
         BranchRepository branchRepository = mock(BranchRepository.class);
         BranchScheduleRepository scheduleRepository = mock(BranchScheduleRepository.class);
         BranchScheduleServiceImpl service = new BranchScheduleServiceImpl(
-                branchRepository,
                 scheduleRepository,
-                new BranchScheduleMapper()
+                new BranchScheduleMapper(),
+                new BranchScheduleValidation(branchRepository, scheduleRepository)
         );
         when(branchRepository.findByBranchIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(branch(true)));
 
@@ -87,9 +91,9 @@ class MasterDataServiceImplTest {
         BranchRepository branchRepository = mock(BranchRepository.class);
         BranchHolidayRepository holidayRepository = mock(BranchHolidayRepository.class);
         BranchHolidayServiceImpl service = new BranchHolidayServiceImpl(
-                branchRepository,
                 holidayRepository,
-                new BranchHolidayMapper()
+                new BranchHolidayMapper(),
+                new BranchHolidayValidation(branchRepository, holidayRepository)
         );
         LocalDate holidayDate = LocalDate.of(2026, 1, 1);
         when(branchRepository.findByBranchIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(branch(true)));
@@ -109,10 +113,9 @@ class MasterDataServiceImplTest {
         ServiceTypeRepository serviceTypeRepository = mock(ServiceTypeRepository.class);
         ServiceCapacitySlotRepository capacitySlotRepository = mock(ServiceCapacitySlotRepository.class);
         ServiceCapacitySlotServiceImpl service = new ServiceCapacitySlotServiceImpl(
-                branchRepository,
-                serviceTypeRepository,
                 capacitySlotRepository,
-                new ServiceCapacitySlotMapper()
+                new ServiceCapacitySlotMapper(),
+                new ServiceCapacitySlotValidation(branchRepository, serviceTypeRepository, capacitySlotRepository)
         );
         when(branchRepository.findByBranchIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(branch(true)));
         when(serviceTypeRepository.findByServiceTypeIdAndIsDeletedFalse(2L))
@@ -137,10 +140,9 @@ class MasterDataServiceImplTest {
         ServiceTypeRepository serviceTypeRepository = mock(ServiceTypeRepository.class);
         ServiceCapacitySlotRepository capacitySlotRepository = mock(ServiceCapacitySlotRepository.class);
         ServiceCapacitySlotServiceImpl service = new ServiceCapacitySlotServiceImpl(
-                branchRepository,
-                serviceTypeRepository,
                 capacitySlotRepository,
-                new ServiceCapacitySlotMapper()
+                new ServiceCapacitySlotMapper(),
+                new ServiceCapacitySlotValidation(branchRepository, serviceTypeRepository, capacitySlotRepository)
         );
         when(branchRepository.findByBranchIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(branch(true)));
         Branch anotherBranch = branch(true);
@@ -162,7 +164,11 @@ class MasterDataServiceImplTest {
     void createCounterRejectsDuplicateNameInBranch() {
         BranchRepository branchRepository = mock(BranchRepository.class);
         CounterRepository counterRepository = mock(CounterRepository.class);
-        CounterServiceImpl service = new CounterServiceImpl(branchRepository, counterRepository, new CounterMapper());
+        CounterServiceImpl service = new CounterServiceImpl(
+                counterRepository,
+                new CounterMapper(),
+                new CounterValidation(branchRepository, counterRepository)
+        );
         when(branchRepository.findByBranchIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(branch(true)));
         when(counterRepository.existsByBranchBranchIdAndNameIgnoreCase(1L, "Counter 1")).thenReturn(true);
 
@@ -184,7 +190,11 @@ class MasterDataServiceImplTest {
                 .build();
         BranchRepository branchRepository = mock(BranchRepository.class);
         CounterRepository counterRepository = mock(CounterRepository.class);
-        CounterServiceImpl service = new CounterServiceImpl(branchRepository, counterRepository, new CounterMapper());
+        CounterServiceImpl service = new CounterServiceImpl(
+                counterRepository,
+                new CounterMapper(),
+                new CounterValidation(branchRepository, counterRepository)
+        );
         when(counterRepository.findById(10L)).thenReturn(Optional.of(counter));
 
         service.deleteCounter(10L);
