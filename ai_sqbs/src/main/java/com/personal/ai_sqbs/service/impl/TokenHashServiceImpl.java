@@ -10,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 @Service
 public class TokenHashServiceImpl implements TokenHashService {
 
+    // Hashes refresh tokens before persistence so raw tokens are not stored in the database.
     @Override
     public String sha256(String rawToken) {
         try {

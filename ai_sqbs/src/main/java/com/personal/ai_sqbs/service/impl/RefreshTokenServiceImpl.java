@@ -34,6 +34,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenHashService tokenHashService;
 
+    // Creates a refresh token, stores only its hash, and returns the raw token for the cookie.
     @Override
     @Transactional
     public String createRefreshToken(UserPrincipal userPrincipal, HttpServletRequest request) {
@@ -59,6 +60,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         return rawRefreshToken;
     }
 
+    // Rotates a valid refresh token and revokes the previous token in the same family.
     @Override
     @Transactional
     public RefreshTokenRotationResult rotateRefreshToken(String rawRefreshToken, HttpServletRequest request) {
@@ -105,6 +107,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         return new RefreshTokenRotationResult(newRawRefreshToken, userPrincipal);
     }
 
+    // Revokes the current refresh token during logout.
     @Override
     @Transactional
     public void revokeCurrentRefreshToken(String rawRefreshToken) {
@@ -122,6 +125,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         }
     }
 
+    // Revokes every active refresh token for a user during logout-all.
     @Override
     @Transactional
     public void revokeAllRefreshTokensForUser(Long userId) {
@@ -132,6 +136,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         );
     }
 
+    // Validates refresh-token signature and expiration before any database lookup is trusted.
     private void validateRefreshJwt(String rawRefreshToken) {
         try {
             jwtTokenProvider.validateRefreshToken(rawRefreshToken);
@@ -140,6 +145,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         }
     }
 
+    // Confirms the raw token matches the hash stored in the database.
     private void validateTokenHash(RefreshToken refreshToken, String rawRefreshToken) {
         String tokenHash = tokenHashService.sha256(rawRefreshToken);
         if (!refreshToken.getTokenHash().equals(tokenHash)) {
@@ -147,6 +153,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         }
     }
 
+    // Ensures refresh tokens are usable only by active, non-deleted, email-verified users.
     private void validateVerifiedUser(User user) {
         if (!Boolean.TRUE.equals(user.getIsActive())
                 || Boolean.TRUE.equals(user.getIsDeleted())
@@ -155,6 +162,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         }
     }
 
+    // Detects suspicious reuse of revoked refresh tokens and revokes the token family.
     private void handleRevokedTokenReuse(RefreshToken oldToken, OffsetDateTime now) {
         boolean withinGraceWindow = oldToken.getRevokedReason() == RevokedReason.ROTATED
                 && oldToken.getRevokedAt() != null
@@ -172,6 +180,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         throw new AppException(ErrorCode.UNAUTHORIZED);
     }
 
+    // Applies a single revoked reason and timestamp to a batch of refresh tokens.
     private void revokeTokens(List<RefreshToken> refreshTokens, OffsetDateTime revokedAt, RevokedReason revokedReason) {
         refreshTokens.forEach(refreshToken -> {
             refreshToken.setRevokedAt(revokedAt);
@@ -179,10 +188,12 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         });
     }
 
+    // Converts JWT expiration instants to UTC OffsetDateTime for database storage.
     private OffsetDateTime toOffsetDateTime(java.time.Instant instant) {
         return OffsetDateTime.ofInstant(instant, ZoneOffset.UTC);
     }
 
+    // Resolves the client IP, preferring the first X-Forwarded-For value behind proxies.
     private String resolveClientIp(HttpServletRequest request) {
         String forwardedFor = request.getHeader("X-Forwarded-For");
         if (StringUtils.hasText(forwardedFor)) {

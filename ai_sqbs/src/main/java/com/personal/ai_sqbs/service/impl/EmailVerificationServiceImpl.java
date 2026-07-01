@@ -31,12 +31,14 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private final MailService mailService;
     private final OtpProperties otpProperties;
 
+    // Generates and sends a verification OTP for a newly registered user.
     @Override
     @Transactional
     public void sendVerificationOtp(User user) {
         createAndSendOtp(user);
     }
 
+    // Verifies the submitted OTP, enforces expiration and attempt limits, then marks email as verified.
     @Override
     @Transactional(noRollbackFor = OtpVerificationException.class)
     public MessageResponse verifyOtp(VerifyOtpRequest request) {
@@ -83,6 +85,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         return message(VERIFY_SUCCESS);
     }
 
+    // Resends OTP with cooldown protection and generic response to avoid email enumeration.
     @Override
     @Transactional
     public MessageResponse resendOtp(ResendOtpRequest request) {
@@ -109,6 +112,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         return message(RESEND_SUCCESS);
     }
 
+    // Creates a new OTP hash, resets attempt counter, persists it, then sends the raw OTP by email.
     private void createAndSendOtp(User user) {
         String rawOtp = otpService.generateNumericOtp();
         OffsetDateTime now = OffsetDateTime.now();
@@ -124,12 +128,14 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         mailService.sendEmailVerificationOtp(user.getEmail(), user.getFullName(), rawOtp);
     }
 
+    // Checks whether the user still has a stored, unexpired OTP.
     private boolean hasActiveOtp(User user, OffsetDateTime now) {
         return user.getEmailVerificationOtpHash() != null
                 && user.getEmailVerificationOtpExpiresAt() != null
                 && user.getEmailVerificationOtpExpiresAt().isAfter(now);
     }
 
+    // Clears OTP state after success, expiration, or max-attempt failure.
     private void clearOtpFields(User user) {
         user.setEmailVerificationOtpHash(null);
         user.setEmailVerificationOtpExpiresAt(null);
@@ -137,14 +143,17 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         user.setEmailVerificationAttemptCount(0);
     }
 
+    // Builds the OTP-specific exception used by noRollbackFor verification flow.
     private OtpVerificationException invalidOtp(ErrorCode errorCode) {
         return new OtpVerificationException(errorCode);
     }
 
+    // Wraps a plain message into the standard auth message response DTO.
     private MessageResponse message(String value) {
         return MessageResponse.builder().message(value).build();
     }
 
+    // Normalizes email input for consistent lookup and comparison.
     private String normalizeEmail(String email) {
         return email.trim().toLowerCase();
     }

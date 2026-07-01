@@ -26,6 +26,7 @@ public class ServiceTypeServiceImpl implements ServiceTypeService {
     private final ServiceTypeMapper serviceTypeMapper;
     private final ServiceTypeValidation serviceTypeValidation;
 
+    // Creates a service type under a branch, including duration and active state.
     @Override
     @Transactional
     public ServiceTypeResponse createServiceType(Long branchId, ServiceTypeCreateRequest request) {
@@ -35,6 +36,7 @@ public class ServiceTypeServiceImpl implements ServiceTypeService {
         return serviceTypeMapper.toResponse(serviceTypeRepository.save(serviceType));
     }
 
+    // Returns all non-deleted service types of a branch.
     @Override
     @Transactional(readOnly = true)
     public List<ServiceTypeResponse> getServiceTypesByBranch(Long branchId) {
@@ -45,6 +47,7 @@ public class ServiceTypeServiceImpl implements ServiceTypeService {
                 .toList();
     }
 
+    // Loads one non-deleted service type by id.
     @Override
     @Transactional(readOnly = true)
     public ServiceTypeResponse getServiceType(Long serviceTypeId) {
@@ -54,6 +57,7 @@ public class ServiceTypeServiceImpl implements ServiceTypeService {
         return serviceTypeMapper.toResponse(serviceType);
     }
 
+    // Updates service type details after validating branch-level uniqueness.
     @Override
     @Transactional
     public ServiceTypeResponse updateServiceType(Long serviceTypeId, ServiceTypeUpdateRequest request) {
@@ -62,6 +66,7 @@ public class ServiceTypeServiceImpl implements ServiceTypeService {
         return serviceTypeMapper.toResponse(serviceType);
     }
 
+    // Soft-deletes a service type and disables it from future bookings.
     @Override
     @Transactional
     public void deleteServiceType(Long serviceTypeId) {
@@ -71,18 +76,21 @@ public class ServiceTypeServiceImpl implements ServiceTypeService {
         serviceType.setDeletedAt(OffsetDateTime.now());
     }
 
+    // Enables a service type so customers can book it again.
     @Override
     @Transactional
     public ServiceTypeResponse activateServiceType(Long serviceTypeId) {
         return updateServiceTypeActiveStatus(serviceTypeId, true);
     }
 
+    // Disables a service type without removing historical records.
     @Override
     @Transactional
     public ServiceTypeResponse deactivateServiceType(Long serviceTypeId) {
         return updateServiceTypeActiveStatus(serviceTypeId, false);
     }
 
+    // Shared helper for service-type activate and deactivate actions.
     private ServiceTypeResponse updateServiceTypeActiveStatus(Long serviceTypeId, boolean active) {
         ServiceType serviceType = serviceTypeValidation.getExistingServiceType(serviceTypeId);
         serviceType.setIsActive(active);

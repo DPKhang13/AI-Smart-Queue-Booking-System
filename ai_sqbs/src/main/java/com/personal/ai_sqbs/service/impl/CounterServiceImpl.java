@@ -22,6 +22,7 @@ public class CounterServiceImpl implements CounterService {
     private final CounterMapper counterMapper;
     private final CounterValidation counterValidation;
 
+    // Creates a service counter inside a branch.
     @Override
     @Transactional
     public CounterResponse createCounter(Long branchId, CounterRequest request) {
@@ -31,6 +32,7 @@ public class CounterServiceImpl implements CounterService {
         return counterMapper.toResponse(counterRepository.save(counter));
     }
 
+    // Returns active counters for one branch.
     @Override
     @Transactional(readOnly = true)
     public List<CounterResponse> getCountersByBranch(Long branchId) {
@@ -40,12 +42,14 @@ public class CounterServiceImpl implements CounterService {
                 .toList();
     }
 
+    // Loads one counter by id.
     @Override
     @Transactional(readOnly = true)
     public CounterResponse getCounter(Long counterId) {
         return counterMapper.toResponse(counterValidation.getExistingCounter(counterId));
     }
 
+    // Updates counter information after validating branch-level uniqueness.
     @Override
     @Transactional
     public CounterResponse updateCounter(Long counterId, CounterRequest request) {
@@ -54,24 +58,28 @@ public class CounterServiceImpl implements CounterService {
         return counterMapper.toResponse(counter);
     }
 
+    // Enables a counter so staff can assign tickets to it.
     @Override
     @Transactional
     public CounterResponse activateCounter(Long counterId) {
         return updateCounterActiveStatus(counterId, true);
     }
 
+    // Disables a counter without removing previous queue history.
     @Override
     @Transactional
     public CounterResponse deactivateCounter(Long counterId) {
         return updateCounterActiveStatus(counterId, false);
     }
 
+    // Shared helper for counter activate and deactivate actions.
     private CounterResponse updateCounterActiveStatus(Long counterId, boolean active) {
         Counter counter = counterValidation.getExistingCounter(counterId);
         counter.setIsActive(active);
         return counterMapper.toResponse(counter);
     }
 
+    // Soft-deletes a counter by marking it inactive.
     @Override
     @Transactional
     public void deleteCounter(Long counterId) {

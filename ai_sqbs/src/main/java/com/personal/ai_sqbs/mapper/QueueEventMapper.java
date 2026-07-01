@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class QueueEventMapper {
 
+    // Maps a queue event entity into the API response DTO.
     public QueueEventResponse toResponse(QueueEvent event) {
         User performedBy = event.getPerformedBy();
 

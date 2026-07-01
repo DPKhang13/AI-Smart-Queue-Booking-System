@@ -40,6 +40,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingValidation bookingValidation;
     private final BookingMapper bookingMapper;
 
+    // Creates a confirmed booking after validating branch, service type, schedule, and capacity.
     @Override
     @Transactional
     public BookingResponse createBooking(BookingCreateRequest request, UserPrincipal currentUser) {
@@ -67,6 +68,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
+    // Returns all bookings that belong to the authenticated user.
     @Override
     @Transactional(readOnly = true)
     public List<BookingSummaryResponse> getMyBookings(UserPrincipal currentUser) {
@@ -75,6 +77,7 @@ public class BookingServiceImpl implements BookingService {
                 .toList();
     }
 
+    // Loads a booking detail and checks whether the current user can view it.
     @Override
     @Transactional(readOnly = true)
     public BookingResponse getBookingById(Long bookingId, UserPrincipal currentUser) {
@@ -83,6 +86,7 @@ public class BookingServiceImpl implements BookingService {
         return bookingMapper.toResponse(booking);
     }
 
+    // Cancels a booking, records cancellation time, and stores the optional reason.
     @Override
     @Transactional
     public BookingResponse cancelBooking(
@@ -100,6 +104,7 @@ public class BookingServiceImpl implements BookingService {
         return bookingMapper.toResponse(booking);
     }
 
+    // Admin action that moves a booking into CONFIRMED status.
     @Override
     @Transactional
     public BookingResponse confirmBooking(Long bookingId, UserPrincipal currentUser) {
@@ -111,6 +116,7 @@ public class BookingServiceImpl implements BookingService {
         return bookingMapper.toResponse(booking);
     }
 
+    // Admin action that marks a booking as completed after service is finished.
     @Override
     @Transactional
     public BookingResponse completeBooking(Long bookingId, UserPrincipal currentUser) {
@@ -122,6 +128,7 @@ public class BookingServiceImpl implements BookingService {
         return bookingMapper.toResponse(booking);
     }
 
+    // Admin action that marks a booking as no-show when the customer does not arrive.
     @Override
     @Transactional
     public BookingResponse markNoShow(Long bookingId, UserPrincipal currentUser) {
@@ -133,11 +140,13 @@ public class BookingServiceImpl implements BookingService {
         return bookingMapper.toResponse(booking);
     }
 
+    // Loads the full user entity for booking ownership and persistence.
     private User getCurrentUser(UserPrincipal currentUser) {
         return userRepository.findWithRoleByUserId(currentUser.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
+    // Generates a unique human-readable booking code for the booking date.
     private String generateBookingCode(BookingCreateRequest request) {
         for (int attempt = 0; attempt < BOOKING_CODE_MAX_ATTEMPTS; attempt++) {
             String bookingCode = "BK-" + request.getBookingDate().toString().replace("-", "")
@@ -151,6 +160,7 @@ public class BookingServiceImpl implements BookingService {
         throw new AppException(ErrorCode.INTERNAL_ERROR, "Unable to generate unique booking code");
     }
 
+    // Builds the random suffix used to reduce booking-code collisions.
     private String randomCodeSuffix() {
         StringBuilder builder = new StringBuilder(BOOKING_CODE_RANDOM_LENGTH);
         for (int index = 0; index < BOOKING_CODE_RANDOM_LENGTH; index++) {
@@ -159,6 +169,7 @@ public class BookingServiceImpl implements BookingService {
         return builder.toString();
     }
 
+    // Converts blank optional text fields to null and trims meaningful values.
     private String normalizeText(String text) {
         if (text == null || text.isBlank()) {
             return null;

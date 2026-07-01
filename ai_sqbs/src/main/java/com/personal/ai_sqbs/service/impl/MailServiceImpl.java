@@ -21,6 +21,7 @@ public class MailServiceImpl implements MailService {
     private final MailProperties mailProperties;
     private final OtpProperties otpProperties;
 
+    // Sends the email verification OTP using configured mail sender details.
     @Override
     public void sendEmailVerificationOtp(String toEmail, String fullName, String otp) {
         try {
@@ -38,6 +39,7 @@ public class MailServiceImpl implements MailService {
         }
     }
 
+    // Builds the plain-text verification email body.
     private String buildEmailBody(String fullName, String otp) {
         return """
                 Hello %s,

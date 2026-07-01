@@ -23,6 +23,7 @@ public class QueueEventController {
 
     @GetMapping("/{ticketId}/events")
     @PreAuthorize("hasAnyRole('USER','STAFF','ADMIN')")
+    // Returns the event timeline for a queue ticket.
     public ResponseEntity<List<QueueEventResponse>> getEventsByTicket(
             @PathVariable Long ticketId,
             @AuthenticationPrincipal UserPrincipal currentUser

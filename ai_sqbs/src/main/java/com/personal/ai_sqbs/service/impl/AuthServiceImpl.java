@@ -47,6 +47,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthMapper authMapper;
     private final EmailVerificationService emailVerificationService;
 
+    // Registers a new user account and sends the first email verification OTP.
     @Override
     @Transactional
     public MessageResponse register(RegisterRequest request) {
@@ -89,6 +90,7 @@ public class AuthServiceImpl implements AuthService {
         );
     }
 
+    // Authenticates by username or email, issues an access token, and stores refresh token in cookie.
     @Override
     @Transactional
     public AuthResponse login(LoginRequest request, HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
@@ -116,6 +118,7 @@ public class AuthServiceImpl implements AuthService {
         return authMapper.toAuthResponse(accessToken, jwtProperties.accessExpirationMs() / 1000, principal);
     }
 
+    // Rotates the refresh token from cookie and returns a new access token.
     @Override
     @Transactional
     public AuthResponse refreshToken(HttpServletRequest request, HttpServletResponse response) {
@@ -133,6 +136,7 @@ public class AuthServiceImpl implements AuthService {
         );
     }
 
+    // Revokes the current refresh token and clears the refresh-token cookie.
     @Override
     @Transactional
     public MessageResponse logout(HttpServletRequest request, HttpServletResponse response) {
@@ -143,6 +147,7 @@ public class AuthServiceImpl implements AuthService {
         return authMapper.toMessageResponse("Logged out successfully");
     }
 
+    // Revokes all active refresh tokens of the current user across devices.
     @Override
     @Transactional
     public MessageResponse logoutAll(HttpServletRequest request, HttpServletResponse response) {
@@ -153,6 +158,7 @@ public class AuthServiceImpl implements AuthService {
         return authMapper.toMessageResponse("Logged out from all devices successfully");
     }
 
+    // Reads the authenticated principal from Spring Security context.
     private UserPrincipal getCurrentPrincipal() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof UserPrincipal principal)) {
@@ -162,6 +168,7 @@ public class AuthServiceImpl implements AuthService {
         return principal;
     }
 
+    // Normalizes optional phone input before checking uniqueness or saving.
     private String normalizePhone(String phone) {
         if (!StringUtils.hasText(phone)) {
             return null;
@@ -170,6 +177,7 @@ public class AuthServiceImpl implements AuthService {
         return phone.trim();
     }
 
+    // Normalizes optional username so login and uniqueness checks are case-insensitive.
     private String normalizeUsername(String username) {
         if (!StringUtils.hasText(username)) {
             return null;

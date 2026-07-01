@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class QueueTicketMapper {
 
+    // Maps a queue ticket entity into the full API response DTO.
     public QueueTicketResponse toResponse(QueueTicket ticket) {
         Booking booking = ticket.getBooking();
         Branch branch = ticket.getBranch();
@@ -50,6 +51,7 @@ public class QueueTicketMapper {
                 .build();
     }
 
+    // Maps a queue ticket entity into a compact branch queue list item.
     public QueueTicketSummaryResponse toSummaryResponse(QueueTicket ticket) {
         User customer = ticket.getCustomer();
         Counter counter = ticket.getCounter();
@@ -69,6 +71,7 @@ public class QueueTicketMapper {
                 .build();
     }
 
+    // Builds the live queue position response without storing queue position.
     public QueuePositionResponse toPositionResponse(QueueTicket ticket, int waitingAhead, int estimatedWaitMinutes) {
         boolean waiting = com.personal.ai_sqbs.enums.QueueStatus.WAITING.equals(ticket.getStatus());
 

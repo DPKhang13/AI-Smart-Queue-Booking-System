@@ -25,11 +25,13 @@ public class OtpServiceImpl implements OtpService {
     private final OtpProperties otpProperties;
     private final SecureRandom secureRandom = new SecureRandom();
 
+    // Generates a six-digit numeric OTP using SecureRandom.
     @Override
     public String generateNumericOtp() {
         return "%06d".formatted(secureRandom.nextInt(OTP_BOUND));
     }
 
+    // Hashes an OTP with HMAC-SHA256 so raw OTP values are never stored.
     @Override
     public String hashOtp(String rawOtp) {
         try {
@@ -44,6 +46,7 @@ public class OtpServiceImpl implements OtpService {
         }
     }
 
+    // Compares a submitted OTP with the stored hash using constant-time comparison.
     @Override
     public boolean matches(String rawOtp, String otpHash) {
         byte[] calculatedHash = hashOtp(rawOtp).getBytes(StandardCharsets.US_ASCII);

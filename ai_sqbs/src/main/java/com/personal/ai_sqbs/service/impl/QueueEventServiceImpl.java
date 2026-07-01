@@ -31,6 +31,7 @@ public class QueueEventServiceImpl implements QueueEventService {
 
     @Override
     @Transactional
+    // Persists a queue audit event for ticket creation, assignment, or status changes.
     public QueueEvent createEvent(
             QueueTicket ticket,
             QueueStatus oldStatus,
@@ -53,6 +54,7 @@ public class QueueEventServiceImpl implements QueueEventService {
 
     @Override
     @Transactional(readOnly = true)
+    // Returns ticket event history after checking viewer permission.
     public List<QueueEventResponse> getEventsByTicket(Long ticketId, UserPrincipal currentUser) {
         QueueTicket ticket = queueTicketRepository.findById(ticketId)
                 .orElseThrow(() -> new AppException(ErrorCode.QUEUE_TICKET_NOT_FOUND));
@@ -63,6 +65,7 @@ public class QueueEventServiceImpl implements QueueEventService {
                 .toList();
     }
 
+    // Normalizes optional event notes before saving.
     private String normalizeText(String text) {
         if (text == null || text.isBlank()) {
             return null;

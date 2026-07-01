@@ -36,6 +36,7 @@ public class QueueTicketController {
 
     @PostMapping("/api/queue-tickets/from-booking/{bookingId}")
     @PreAuthorize("hasAnyRole('USER','STAFF','ADMIN')")
+    // Checks in a confirmed booking and creates a WAITING queue ticket.
     public ResponseEntity<QueueTicketResponse> createTicketFromBooking(
             @PathVariable Long bookingId,
             @AuthenticationPrincipal UserPrincipal currentUser
@@ -46,6 +47,7 @@ public class QueueTicketController {
 
     @PostMapping("/api/queue-tickets/walk-in")
     @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    // Creates a queue ticket for a walk-in guest without a booking.
     public ResponseEntity<QueueTicketResponse> createWalkInTicket(
             @Valid @RequestBody WalkInTicketCreateRequest request,
             @AuthenticationPrincipal UserPrincipal currentUser
@@ -56,6 +58,7 @@ public class QueueTicketController {
 
     @GetMapping("/api/queue-tickets/{ticketId}")
     @PreAuthorize("hasAnyRole('USER','STAFF','ADMIN')")
+    // Returns full ticket details for users allowed to view the ticket.
     public ResponseEntity<QueueTicketResponse> getTicketById(
             @PathVariable Long ticketId,
             @AuthenticationPrincipal UserPrincipal currentUser
@@ -65,6 +68,7 @@ public class QueueTicketController {
 
     @GetMapping("/api/branches/{branchId}/queue-tickets")
     @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    // Returns branch queue tickets by date, with optional status filter.
     public ResponseEntity<List<QueueTicketSummaryResponse>> getBranchQueue(
             @PathVariable Long branchId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate queueDate,
@@ -76,6 +80,7 @@ public class QueueTicketController {
 
     @GetMapping("/api/queue-tickets/{ticketId}/position")
     @PreAuthorize("hasAnyRole('USER','STAFF','ADMIN')")
+    // Returns the ticket's live queue position and estimated wait.
     public ResponseEntity<QueuePositionResponse> getTicketPosition(
             @PathVariable Long ticketId,
             @AuthenticationPrincipal UserPrincipal currentUser
@@ -85,6 +90,7 @@ public class QueueTicketController {
 
     @PatchMapping("/api/queue-tickets/{ticketId}/assign-staff")
     @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    // Assigns a staff member to handle the ticket.
     public ResponseEntity<QueueTicketResponse> assignStaff(
             @PathVariable Long ticketId,
             @Valid @RequestBody QueueTicketAssignStaffRequest request,
@@ -95,6 +101,7 @@ public class QueueTicketController {
 
     @PatchMapping("/api/queue-tickets/{ticketId}/assign-counter")
     @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    // Assigns a service counter to the ticket.
     public ResponseEntity<QueueTicketResponse> assignCounter(
             @PathVariable Long ticketId,
             @Valid @RequestBody QueueTicketAssignCounterRequest request,
@@ -105,6 +112,7 @@ public class QueueTicketController {
 
     @PatchMapping("/api/queue-tickets/{ticketId}/start")
     @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    // Starts serving a waiting ticket.
     public ResponseEntity<QueueTicketResponse> startTicket(
             @PathVariable Long ticketId,
             @AuthenticationPrincipal UserPrincipal currentUser
@@ -114,6 +122,7 @@ public class QueueTicketController {
 
     @PatchMapping("/api/queue-tickets/{ticketId}/complete")
     @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    // Completes a ticket currently in service.
     public ResponseEntity<QueueTicketResponse> completeTicket(
             @PathVariable Long ticketId,
             @AuthenticationPrincipal UserPrincipal currentUser
@@ -123,6 +132,7 @@ public class QueueTicketController {
 
     @PatchMapping("/api/queue-tickets/{ticketId}/skip")
     @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    // Marks a waiting ticket as skipped.
     public ResponseEntity<QueueTicketResponse> skipTicket(
             @PathVariable Long ticketId,
             @AuthenticationPrincipal UserPrincipal currentUser
@@ -132,6 +142,7 @@ public class QueueTicketController {
 
     @PatchMapping("/api/queue-tickets/{ticketId}/cancel")
     @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    // Cancels a waiting or in-progress ticket.
     public ResponseEntity<QueueTicketResponse> cancelTicket(
             @PathVariable Long ticketId,
             @Valid @RequestBody(required = false) QueueTicketCancelRequest request,

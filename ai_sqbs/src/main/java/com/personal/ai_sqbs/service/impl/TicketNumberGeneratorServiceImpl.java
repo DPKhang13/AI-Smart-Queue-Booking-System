@@ -19,6 +19,7 @@ public class TicketNumberGeneratorServiceImpl implements TicketNumberGeneratorSe
     private final QueueTicketRepository queueTicketRepository;
 
     @Override
+    // Generates the next branch/date ticket number in Q0001 format.
     public synchronized String generateTicketNumber(Long branchId, LocalDate queueDate) {
         int nextNumber = queueTicketRepository
                 .findTopByBranchBranchIdAndQueueDateOrderByTicketIdDesc(branchId, queueDate)
@@ -40,6 +41,7 @@ public class TicketNumberGeneratorServiceImpl implements TicketNumberGeneratorSe
         throw new AppException(ErrorCode.TICKET_NUMBER_GENERATION_FAILED);
     }
 
+    // Extracts the numeric sequence from a stored ticket number.
     private int parseTicketNumber(String ticketNumber) {
         if (ticketNumber == null || !ticketNumber.startsWith("Q")) {
             return 0;
@@ -52,6 +54,7 @@ public class TicketNumberGeneratorServiceImpl implements TicketNumberGeneratorSe
         }
     }
 
+    // Formats an integer sequence as a queue ticket number.
     private String formatTicketNumber(int number) {
         return "Q" + String.format("%04d", number);
     }

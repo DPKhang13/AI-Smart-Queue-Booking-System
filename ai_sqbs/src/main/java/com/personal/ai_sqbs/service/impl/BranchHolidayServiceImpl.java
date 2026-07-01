@@ -22,6 +22,7 @@ public class BranchHolidayServiceImpl implements BranchHolidayService {
     private final BranchHolidayMapper branchHolidayMapper;
     private final BranchHolidayValidation branchHolidayValidation;
 
+    // Creates a holiday or special closed date for a branch.
     @Override
     @Transactional
     public BranchHolidayResponse createHoliday(Long branchId, BranchHolidayRequest request) {
@@ -30,6 +31,7 @@ public class BranchHolidayServiceImpl implements BranchHolidayService {
         return branchHolidayMapper.toResponse(branchHolidayRepository.save(holiday));
     }
 
+    // Returns all holiday dates configured for a branch.
     @Override
     @Transactional(readOnly = true)
     public List<BranchHolidayResponse> getHolidaysByBranch(Long branchId) {
@@ -39,12 +41,14 @@ public class BranchHolidayServiceImpl implements BranchHolidayService {
                 .toList();
     }
 
+    // Loads one branch holiday by id.
     @Override
     @Transactional(readOnly = true)
     public BranchHolidayResponse getHoliday(Long holidayId) {
         return branchHolidayMapper.toResponse(branchHolidayValidation.getExistingHoliday(holidayId));
     }
 
+    // Updates a branch holiday after checking date conflicts.
     @Override
     @Transactional
     public BranchHolidayResponse updateHoliday(Long holidayId, BranchHolidayRequest request) {
@@ -53,6 +57,7 @@ public class BranchHolidayServiceImpl implements BranchHolidayService {
         return branchHolidayMapper.toResponse(holiday);
     }
 
+    // Deletes a branch holiday when the branch should open on that date again.
     @Override
     @Transactional
     public void deleteHoliday(Long holidayId) {

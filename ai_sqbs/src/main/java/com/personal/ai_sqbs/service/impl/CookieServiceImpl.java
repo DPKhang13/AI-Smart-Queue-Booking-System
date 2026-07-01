@@ -24,6 +24,7 @@ public class CookieServiceImpl implements CookieService {
     private final CookieProperties cookieProperties;
     private final Environment environment;
 
+    // Fails fast if production profile uses an insecure refresh-token cookie.
     @PostConstruct
     void validateCookieSettings() {
         boolean prodProfile = Arrays.asList(environment.getActiveProfiles()).contains("prod");
@@ -32,6 +33,7 @@ public class CookieServiceImpl implements CookieService {
         }
     }
 
+    // Adds the refresh token to an HttpOnly cookie on the response.
     @Override
     public void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         ResponseCookie cookie = baseRefreshCookie(refreshToken)
@@ -41,6 +43,7 @@ public class CookieServiceImpl implements CookieService {
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
+    // Clears the refresh-token cookie by sending an expired cookie.
     @Override
     public void clearRefreshTokenCookie(HttpServletResponse response) {
         ResponseCookie cookie = baseRefreshCookie("")
@@ -50,6 +53,7 @@ public class CookieServiceImpl implements CookieService {
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
+    // Reads the refresh token from request cookies if present.
     @Override
     public Optional<String> readRefreshTokenCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
@@ -63,6 +67,7 @@ public class CookieServiceImpl implements CookieService {
                 .findFirst();
     }
 
+    // Builds shared refresh-token cookie attributes from configuration.
     private ResponseCookie.ResponseCookieBuilder baseRefreshCookie(String value) {
         return ResponseCookie.from(cookieProperties.refreshTokenName(), value)
                 .httpOnly(cookieProperties.httpOnly())

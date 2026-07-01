@@ -23,6 +23,7 @@ public class QueueValidation {
     private final BranchValidation branchValidation;
     private final ServiceTypeValidation serviceTypeValidation;
 
+    // Validates that a booking can be converted into exactly one queue ticket.
     public void validateBookingForTicket(Booking booking, boolean alreadyHasTicket, UserPrincipal currentUser) {
         if (!BookingStatus.CONFIRMED.equals(booking.getStatus())) {
             throw new AppException(ErrorCode.BOOKING_STATUS_INVALID);
@@ -38,6 +39,7 @@ public class QueueValidation {
         }
     }
 
+    // Validates walk-in guest information and resolves the active branch/service type.
     public WalkInValidationResult validateWalkInRequest(WalkInTicketCreateRequest request) {
         Branch branch = branchValidation.getNonDeletedBranch(request.getBranchId());
         if (!Boolean.TRUE.equals(branch.getIsActive())) {
@@ -60,12 +62,14 @@ public class QueueValidation {
         return new WalkInValidationResult(branch, serviceType);
     }
 
+    // Blocks assign/start/cancel operations after a ticket reaches a terminal state.
     public void validateNotTerminal(QueueTicket ticket) {
         if (isTerminal(ticket.getStatus())) {
             throw new AppException(ErrorCode.QUEUE_TICKET_TERMINAL_STATUS);
         }
     }
 
+    // Ensures the assigned user exists and has STAFF role.
     public void validateAssignedStaff(User staff) {
         if (staff == null) {
             throw new AppException(ErrorCode.STAFF_NOT_FOUND);
@@ -76,6 +80,7 @@ public class QueueValidation {
         }
     }
 
+    // Ensures the counter is active and belongs to the ticket branch.
     public void validateCounterForTicket(Counter counter, QueueTicket ticket) {
         if (counter == null) {
             throw new AppException(ErrorCode.COUNTER_NOT_FOUND);
@@ -90,6 +95,7 @@ public class QueueValidation {
         }
     }
 
+    // Enforces allowed queue workflow transitions.
     public void validateTransition(QueueTicket ticket, QueueStatus targetStatus) {
         QueueStatus currentStatus = ticket.getStatus();
 
@@ -115,10 +121,12 @@ public class QueueValidation {
         }
     }
 
+    // Terminal tickets cannot be operated again.
     public boolean isTerminal(QueueStatus status) {
         return status == QueueStatus.COMPLETED || status == QueueStatus.CANCELLED;
     }
 
+    // Treats null, empty, and whitespace-only strings as missing input.
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
     }

@@ -24,6 +24,7 @@ public class ServiceCapacitySlotServiceImpl implements ServiceCapacitySlotServic
     private final ServiceCapacitySlotMapper serviceCapacitySlotMapper;
     private final ServiceCapacitySlotValidation serviceCapacitySlotValidation;
 
+    // Creates capacity limits for a branch/service/time window combination.
     @Override
     @Transactional
     public ServiceCapacitySlotResponse createCapacitySlot(ServiceCapacitySlotCreateRequest request) {
@@ -36,6 +37,7 @@ public class ServiceCapacitySlotServiceImpl implements ServiceCapacitySlotServic
         return serviceCapacitySlotMapper.toResponse(serviceCapacitySlotRepository.save(capacitySlot));
     }
 
+    // Returns active capacity slots across the system.
     @Override
     @Transactional(readOnly = true)
     public List<ServiceCapacitySlotResponse> getCapacitySlots() {
@@ -44,6 +46,7 @@ public class ServiceCapacitySlotServiceImpl implements ServiceCapacitySlotServic
                 .toList();
     }
 
+    // Returns active capacity slots configured for one branch.
     @Override
     @Transactional(readOnly = true)
     public List<ServiceCapacitySlotResponse> getCapacitySlotsByBranch(Long branchId) {
@@ -53,6 +56,7 @@ public class ServiceCapacitySlotServiceImpl implements ServiceCapacitySlotServic
                 .toList();
     }
 
+    // Loads one capacity slot by id.
     @Override
     @Transactional(readOnly = true)
     public ServiceCapacitySlotResponse getCapacitySlot(Long capacitySlotId) {
@@ -60,6 +64,7 @@ public class ServiceCapacitySlotServiceImpl implements ServiceCapacitySlotServic
         return serviceCapacitySlotMapper.toResponse(capacitySlot);
     }
 
+    // Updates capacity-slot rules after validating branch, service type, and time conflicts.
     @Override
     @Transactional
     public ServiceCapacitySlotResponse updateCapacitySlot(
@@ -76,24 +81,28 @@ public class ServiceCapacitySlotServiceImpl implements ServiceCapacitySlotServic
         return serviceCapacitySlotMapper.toResponse(capacitySlot);
     }
 
+    // Enables a capacity slot so it participates in booking capacity checks.
     @Override
     @Transactional
     public ServiceCapacitySlotResponse activateCapacitySlot(Long capacitySlotId) {
         return updateCapacitySlotActiveStatus(capacitySlotId, true);
     }
 
+    // Disables a capacity slot without deleting its configuration history.
     @Override
     @Transactional
     public ServiceCapacitySlotResponse deactivateCapacitySlot(Long capacitySlotId) {
         return updateCapacitySlotActiveStatus(capacitySlotId, false);
     }
 
+    // Shared helper for capacity-slot activate and deactivate actions.
     private ServiceCapacitySlotResponse updateCapacitySlotActiveStatus(Long capacitySlotId, boolean active) {
         ServiceCapacitySlot capacitySlot = serviceCapacitySlotValidation.getExistingCapacitySlot(capacitySlotId);
         capacitySlot.setIsActive(active);
         return serviceCapacitySlotMapper.toResponse(capacitySlot);
     }
 
+    // Deletes a capacity slot configuration when it is no longer needed.
     @Override
     @Transactional
     public void deleteCapacitySlot(Long capacitySlotId) {

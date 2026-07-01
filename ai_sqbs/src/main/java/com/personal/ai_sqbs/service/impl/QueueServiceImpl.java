@@ -56,6 +56,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     @Transactional
+    // Creates a WAITING queue ticket from an existing CONFIRMED booking.
     public QueueTicketResponse createTicketFromBooking(Long bookingId, UserPrincipal currentUser) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
@@ -99,6 +100,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     @Transactional
+    // Creates a walk-in ticket for guests without a booking.
     public QueueTicketResponse createWalkInTicket(WalkInTicketCreateRequest request, UserPrincipal currentUser) {
         queueAuthorizationService.validateCanOperateTicket(currentUser);
         QueueValidation.WalkInValidationResult validationResult = queueValidation.validateWalkInRequest(request);
@@ -135,6 +137,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     @Transactional(readOnly = true)
+    // Returns ticket details after checking whether the current user can view it.
     public QueueTicketResponse getTicketById(Long ticketId, UserPrincipal currentUser) {
         QueueTicket ticket = getExistingTicket(ticketId);
         queueAuthorizationService.validateCanViewTicket(ticket, currentUser);
@@ -143,6 +146,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     @Transactional(readOnly = true)
+    // Returns a branch queue for a date, optionally filtered by queue status.
     public List<QueueTicketSummaryResponse> getBranchQueue(
             Long branchId,
             LocalDate queueDate,
@@ -171,6 +175,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     @Transactional(readOnly = true)
+    // Calculates the current dynamic position for a WAITING ticket.
     public QueuePositionResponse getTicketPosition(Long ticketId, UserPrincipal currentUser) {
         QueueTicket ticket = getExistingTicket(ticketId);
         queueAuthorizationService.validateCanViewTicket(ticket, currentUser);
@@ -182,6 +187,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     @Transactional
+    // Assigns a STAFF user to a non-terminal queue ticket.
     public QueueTicketResponse assignStaff(
             Long ticketId,
             QueueTicketAssignStaffRequest request,
@@ -211,6 +217,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     @Transactional
+    // Assigns an active counter from the same branch to a non-terminal ticket.
     public QueueTicketResponse assignCounter(
             Long ticketId,
             QueueTicketAssignCounterRequest request,
@@ -240,6 +247,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     @Transactional
+    // Starts service for a WAITING ticket and moves it to IN_PROGRESS.
     public QueueTicketResponse startTicket(Long ticketId, UserPrincipal currentUser) {
         return transitionTicket(
                 ticketId,
@@ -252,6 +260,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     @Transactional
+    // Completes an IN_PROGRESS ticket and records actual waiting time.
     public QueueTicketResponse completeTicket(Long ticketId, UserPrincipal currentUser) {
         return transitionTicket(
                 ticketId,
@@ -264,6 +273,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     @Transactional
+    // Skips a WAITING ticket without deleting it from queue history.
     public QueueTicketResponse skipTicket(Long ticketId, UserPrincipal currentUser) {
         return transitionTicket(
                 ticketId,
@@ -276,6 +286,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     @Transactional
+    // Cancels a WAITING or IN_PROGRESS ticket and stores the optional reason as event note.
     public QueueTicketResponse cancelTicket(
             Long ticketId,
             QueueTicketCancelRequest request,
@@ -290,6 +301,7 @@ public class QueueServiceImpl implements QueueService {
         );
     }
 
+    // Centralizes all status transitions so every change is validated and logged.
     private QueueTicketResponse transitionTicket(
             Long ticketId,
             QueueStatus targetStatus,
@@ -316,6 +328,7 @@ public class QueueServiceImpl implements QueueService {
         return queueTicketMapper.toResponse(ticket);
     }
 
+    // Converts DB uniqueness conflicts into a queue-specific business error.
     private QueueTicket saveTicket(QueueTicket ticket) {
         try {
             return queueTicketRepository.saveAndFlush(ticket);
@@ -324,16 +337,19 @@ public class QueueServiceImpl implements QueueService {
         }
     }
 
+    // Loads a ticket or returns a controlled not-found error.
     private QueueTicket getExistingTicket(Long ticketId) {
         return queueTicketRepository.findById(ticketId)
                 .orElseThrow(() -> new AppException(ErrorCode.QUEUE_TICKET_NOT_FOUND));
     }
 
+    // Reloads the authenticated user entity for relationships and audit events.
     private User getCurrentUser(UserPrincipal currentUser) {
         return userRepository.findWithRoleByUserId(currentUser.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
+    // Counts WAITING tickets before this one using check-in time and ticket id ordering.
     private int calculateWaitingAhead(QueueTicket ticket) {
         if (!QueueStatus.WAITING.equals(ticket.getStatus()) || ticket.getCheckInTime() == null) {
             return 0;
@@ -348,6 +364,7 @@ public class QueueServiceImpl implements QueueService {
         ));
     }
 
+    // Stores an initial estimate at ticket creation based on tickets already waiting.
     private int calculateEstimatedWaitOnCreate(
             Branch branch,
             ServiceType serviceType,
@@ -364,6 +381,7 @@ public class QueueServiceImpl implements QueueService {
         return calculateEstimatedWait(branch, serviceType, Math.toIntExact(waitingAhead));
     }
 
+    // Uses service duration first, then falls back to branch average duration.
     private int calculateEstimatedWait(Branch branch, ServiceType serviceType, int waitingAhead) {
         Integer duration = serviceType.getEstimatedDurationMinutes();
         if (duration == null || duration <= 0) {
@@ -377,6 +395,7 @@ public class QueueServiceImpl implements QueueService {
         return waitingAhead * duration;
     }
 
+    // Actual wait is the time from check-in until service starts.
     private Integer calculateActualWaitMinutes(QueueTicket ticket) {
         if (ticket.getCheckInTime() == null || ticket.getStartServiceTime() == null) {
             return null;
@@ -386,6 +405,7 @@ public class QueueServiceImpl implements QueueService {
         return Math.toIntExact(Math.max(minutes, 0));
     }
 
+    // Keeps optional notes and guest fields clean before saving.
     private String normalizeText(String text) {
         if (text == null || text.isBlank()) {
             return null;

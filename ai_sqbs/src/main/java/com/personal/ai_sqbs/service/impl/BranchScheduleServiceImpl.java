@@ -22,6 +22,7 @@ public class BranchScheduleServiceImpl implements BranchScheduleService {
     private final BranchScheduleMapper branchScheduleMapper;
     private final BranchScheduleValidation branchScheduleValidation;
 
+    // Creates a weekly working schedule for a branch.
     @Override
     @Transactional
     public BranchScheduleResponse createSchedule(Long branchId, BranchScheduleRequest request) {
@@ -30,6 +31,7 @@ public class BranchScheduleServiceImpl implements BranchScheduleService {
         return branchScheduleMapper.toResponse(branchScheduleRepository.save(schedule));
     }
 
+    // Returns all weekly schedules configured for a branch.
     @Override
     @Transactional(readOnly = true)
     public List<BranchScheduleResponse> getSchedulesByBranch(Long branchId) {
@@ -39,12 +41,14 @@ public class BranchScheduleServiceImpl implements BranchScheduleService {
                 .toList();
     }
 
+    // Loads one branch schedule by id.
     @Override
     @Transactional(readOnly = true)
     public BranchScheduleResponse getSchedule(Long scheduleId) {
         return branchScheduleMapper.toResponse(branchScheduleValidation.getExistingSchedule(scheduleId));
     }
 
+    // Updates a branch schedule after validating duplicate day and time range.
     @Override
     @Transactional
     public BranchScheduleResponse updateSchedule(Long scheduleId, BranchScheduleRequest request) {
@@ -53,6 +57,7 @@ public class BranchScheduleServiceImpl implements BranchScheduleService {
         return branchScheduleMapper.toResponse(schedule);
     }
 
+    // Deletes a branch schedule record when it is no longer used.
     @Override
     @Transactional
     public void deleteSchedule(Long scheduleId) {

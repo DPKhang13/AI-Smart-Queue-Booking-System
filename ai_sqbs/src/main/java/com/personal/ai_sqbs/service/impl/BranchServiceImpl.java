@@ -23,6 +23,7 @@ public class BranchServiceImpl implements BranchService {
     private final BranchMapper branchMapper;
     private final BranchValidation branchValidation;
 
+    // Creates a branch after checking business rules such as duplicate name or phone.
     @Override
     @Transactional
     public BranchResponse createBranch(BranchCreateRequest request) {
@@ -32,6 +33,7 @@ public class BranchServiceImpl implements BranchService {
         return branchMapper.toResponse(branchRepository.save(branch));
     }
 
+    // Returns all non-deleted branches for admin or public listing.
     @Override
     @Transactional(readOnly = true)
     public List<BranchResponse> getBranches() {
@@ -40,6 +42,7 @@ public class BranchServiceImpl implements BranchService {
                 .toList();
     }
 
+    // Loads one non-deleted branch by id.
     @Override
     @Transactional(readOnly = true)
     public BranchResponse getBranch(Long branchId) {
@@ -47,6 +50,7 @@ public class BranchServiceImpl implements BranchService {
         return branchMapper.toResponse(branch);
     }
 
+    // Updates branch information after validating conflicts and time rules.
     @Override
     @Transactional
     public BranchResponse updateBranch(Long branchId, BranchUpdateRequest request) {
@@ -55,6 +59,7 @@ public class BranchServiceImpl implements BranchService {
         return branchMapper.toResponse(branch);
     }
 
+    // Soft-deletes a branch and disables it from new operations.
     @Override
     @Transactional
     public void deleteBranch(Long branchId) {
@@ -64,18 +69,21 @@ public class BranchServiceImpl implements BranchService {
         branch.setDeletedAt(OffsetDateTime.now());
     }
 
+    // Enables a branch so it can be used again.
     @Override
     @Transactional
     public BranchResponse activateBranch(Long branchId) {
         return updateBranchActiveStatus(branchId, true);
     }
 
+    // Disables a branch without deleting its historical data.
     @Override
     @Transactional
     public BranchResponse deactivateBranch(Long branchId) {
         return updateBranchActiveStatus(branchId, false);
     }
 
+    // Shared helper for branch activate and deactivate actions.
     private BranchResponse updateBranchActiveStatus(Long branchId, boolean active) {
         Branch branch = branchValidation.getExistingBranch(branchId);
         branch.setIsActive(active);
